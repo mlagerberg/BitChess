@@ -10,15 +10,15 @@ It is pretty much feature-complete (I think), relatively smart, and not all too 
 
 ## Screenshots
 
-This is a screenshot, honestly:
+Running on a Raspberry Pi.
+Starting a new game:
 
-<pre>
-<b>~/bitchess $</b> ./chess new
-user plays white
-<b>~/bitchess $</b> ./chess e4
-Thinking..........
-1. ... Nc6
-</pre>
+![Starting a game. Virtual coin toss decides who plays white.](https://i.imgur.com/SjlRkk6.png)
+
+Making a move:
+
+![Making a move](https://i.imgur.com/epdcOpj.png)
+
 
 ## The chess engine
 
