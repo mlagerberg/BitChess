@@ -111,7 +111,7 @@ int get_game_slot(char *arg);
 // Prepares the Windows Command Prompt to show unicode characters
 #ifdef UNICODE_FIX
 void fix_unicode() {
-	UINT oldCodePage;
+	//UINT oldCodePage;
 	//oldCodePage = GetConsoleOutputCP();
 	if (!SetConsoleOutputCP(65001)) {
 		fprintf(stderr, "Unable to set codepage to unicode.\n");

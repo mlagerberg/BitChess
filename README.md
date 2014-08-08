@@ -67,13 +67,13 @@ For performance, I'd really like to see the following added as well:
 - improve alpha-beta pruning to not only cut off the search in the current chunk, but in other chunks as well (the set of possible moves is split into a few chunks which are searched and evaluated in parallel)
 - use a opening book at the start,
 - use end-game tables or otherwise improve the end game (it is *terrible* at the moment),
-- improve and add unit tests,
+- improve and add unit tests.
 
 
 
 ## Building
 
-Simple run the `build.sh` on Linux or the `build.bat` on Windows. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+Simply run `make` to build on Linux or Windows. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
 
 
 

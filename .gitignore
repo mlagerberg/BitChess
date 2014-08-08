@@ -25,3 +25,5 @@
 # Game files
 *.game
 *.moves
+.game.bak
+.moves.bak
