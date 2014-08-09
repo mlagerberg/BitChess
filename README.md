@@ -10,15 +10,15 @@ It is pretty much feature-complete (I think), relatively smart, and not all too 
 
 ## Screenshots
 
-This is a screenshot, honestly:
+Running on a Raspberry Pi.
+Starting a new game:
 
-<pre>
-<b>~/bitchess $</b> ./chess new
-user plays white
-<b>~/bitchess $</b> ./chess e4
-Thinking..........
-1. ... Nc6
-</pre>
+![Starting a game. Virtual coin toss decides who plays white.](https://i.imgur.com/SjlRkk6.png)
+
+Making a move:
+
+![Making a move](https://i.imgur.com/epdcOpj.png)
+
 
 ## The chess engine
 
@@ -67,13 +67,13 @@ For performance, I'd really like to see the following added as well:
 - improve alpha-beta pruning to not only cut off the search in the current chunk, but in other chunks as well (the set of possible moves is split into a few chunks which are searched and evaluated in parallel)
 - use a opening book at the start,
 - use end-game tables or otherwise improve the end game (it is *terrible* at the moment),
-- improve and add unit tests,
+- improve and add unit tests.
 
 
 
 ## Building
 
-Simple run the `build.sh` on Linux or the `build.bat` on Windows. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+Simply run `make` to build on Linux or Windows. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
 
 
 
