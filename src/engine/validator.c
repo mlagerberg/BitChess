@@ -393,13 +393,13 @@ static int get_valid_moves_pawn(Move **head, Board *board, int x, int y, int col
 	}
 	// En passant)
 	if (color == WHITE) {
-		if (board->white_can_en_passant >= 0 && y==3 &&
+		if (board->white_can_en_passant >= 0 && y == RANK_5 &&
 				(x == board->white_can_en_passant - 1 || x == board->white_can_en_passant + 1)) {
 			add_move(head, Move_create(color, x, y, board->white_can_en_passant, y - 1, 0));
 			count++;
 		}
 	} else {
-		if (board->black_can_en_passant >= 0 && y == 4 &&
+		if (board->black_can_en_passant >= 0 && y == RANK_4 &&
 				(x == board->black_can_en_passant - 1 || x == board->black_can_en_passant + 1)) {
 			add_move(head, Move_create(color, x, y, board->black_can_en_passant, y+1, 0));
 			count++;
