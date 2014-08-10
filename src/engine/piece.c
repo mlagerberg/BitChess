@@ -89,15 +89,10 @@ bool Piece_equals(Piece *left, Piece *right) {
 	return Piece_matches(left, right->shape, right->color);
 }
 
-void Piece_print(Piece *p) {
+void Piece_print_color(Piece *p) {
 	if (p == NULL) {
-		#ifdef UNICODE_OUTPUT
-		printf(" ");
-		#else
 		printf("   ");
-		#endif
 	} else {
-		#ifdef UNICODE_OUTPUT
 		if (p->color == WHITE) {
 			printf("%s", color_white);
 		} else {
@@ -111,17 +106,37 @@ void Piece_print(Piece *p) {
 			case QUEEN:		printf("♛");	break;
 			case KING: 		printf("♚");	break;
 		}
-		// } else {
-		// 	printf("%s", color_black);
-		// 	switch(p->shape) {
-		// 		case PAWN:		printf("♙");	break;
-		// 		case ROOK:		printf("♖");	break;
-		// 		case KNIGHT:	printf("♘");	break;
-		// 		case BISHOP:	printf("♗");	break;
-		// 		case QUEEN:		printf("♕");	break;
-		// 		case KING: 		printf("♔");	break;
-		// 	}
-		// }
+	}
+}
+
+void Piece_print(Piece *p) {
+	if (p == NULL) {
+		#ifdef UNICODE_OUTPUT
+		printf(" ");
+		#else
+		printf("   ");
+		#endif
+	} else {
+		#ifdef UNICODE_OUTPUT
+		if (p->color == WHITE) {
+			switch(p->shape) {
+				case PAWN:		printf("♟");	break;
+				case ROOK:		printf("♜");	break;
+				case KNIGHT:	printf("♞");	break;
+				case BISHOP:	printf("♝");	break;
+				case QUEEN:		printf("♛");	break;
+				case KING: 		printf("♚");	break;
+			}
+		} else {
+			switch(p->shape) {
+				case PAWN:		printf("♙");	break;
+				case ROOK:		printf("♖");	break;
+				case KNIGHT:	printf("♘");	break;
+				case BISHOP:	printf("♗");	break;
+				case QUEEN:		printf("♕");	break;
+				case KING: 		printf("♔");	break;
+			}
+		}
 		#else
 		if (p->color == WHITE) {
 			switch(p->shape) {

@@ -53,6 +53,11 @@ void Board_remove_piece(Board *b, int x, int y);
 void Board_print(Board *b, int player);
 
 /**
+ * Like Board_print(Board*, int), but in color
+ */
+void Board_print_color(Board *b, int player);
+
+/**
  * Prints a list of captures piece from the given player.
  */
 void Board_print_captures(Board *b, int color);

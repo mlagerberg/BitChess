@@ -120,7 +120,7 @@ void Board_reset(Board *b) {
 }
 
 #ifdef UNICODE_OUTPUT
-void Board_print_old(Board *b, int player) {
+void Board_print(Board *b, int player) {
 	int i,j,row,col;
 	if (player == WHITE) {
 		printf("    A   B   C   D   E   F   G   H\n");
@@ -183,7 +183,7 @@ void Board_print_old(Board *b, int player) {
 	}
 }
 
-void Board_print(Board *b, int player) {
+void Board_print_color(Board *b, int player) {
 	int i,j,row,col;
 	char *tile1, *tile2;
 	if (player == WHITE) {
@@ -214,7 +214,7 @@ void Board_print(Board *b, int player) {
 			} else {
 				row = 7-i; col = 7-j;
 			}
-			Piece_print(b->fields[col][row]);
+			Piece_print_color(b->fields[col][row]);
 		}
 		if (player == BLACK) {
 			printf("  %s  %c  ", resetcolor, '1' + i);

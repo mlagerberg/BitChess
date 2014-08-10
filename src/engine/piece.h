@@ -48,4 +48,9 @@ bool Piece_equals(Piece *left, Piece *right);
  */
 void Piece_print(Piece *p);
 
+/**
+ * Like Piece_print(Piece*), but in color.
+ */
+void Piece_print_color(Piece *p);
+
 #endif
