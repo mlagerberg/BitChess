@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "color.h"
 #include "datatypes.h"
 #include "piece.h"
 
@@ -98,24 +99,29 @@ void Piece_print(Piece *p) {
 	} else {
 		#ifdef UNICODE_OUTPUT
 		if (p->color == WHITE) {
-			switch(p->shape) {
-				case PAWN:		printf("♟");	break;
-				case ROOK:		printf("♜");	break;
-				case KNIGHT:	printf("♞");	break;
-				case BISHOP:	printf("♝");	break;
-				case QUEEN:		printf("♛");	break;
-				case KING: 		printf("♚");	break;
-			}
+			printf("%s", color_white);
 		} else {
-			switch(p->shape) {
-				case PAWN:		printf("♙");	break;
-				case ROOK:		printf("♖");	break;
-				case KNIGHT:	printf("♘");	break;
-				case BISHOP:	printf("♗");	break;
-				case QUEEN:		printf("♕");	break;
-				case KING: 		printf("♔");	break;
-			}
+			printf("%s", color_black);
 		}
+		switch(p->shape) {
+			case PAWN:		printf("♟");	break;
+			case ROOK:		printf("♜");	break;
+			case KNIGHT:	printf("♞");	break;
+			case BISHOP:	printf("♝");	break;
+			case QUEEN:		printf("♛");	break;
+			case KING: 		printf("♚");	break;
+		}
+		// } else {
+		// 	printf("%s", color_black);
+		// 	switch(p->shape) {
+		// 		case PAWN:		printf("♙");	break;
+		// 		case ROOK:		printf("♖");	break;
+		// 		case KNIGHT:	printf("♘");	break;
+		// 		case BISHOP:	printf("♗");	break;
+		// 		case QUEEN:		printf("♕");	break;
+		// 		case KING: 		printf("♔");	break;
+		// 	}
+		// }
 		#else
 		if (p->color == WHITE) {
 			switch(p->shape) {

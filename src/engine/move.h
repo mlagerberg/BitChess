@@ -41,6 +41,11 @@ inline bool Move_equals(Move *m1, Move *m2);
  */
 void Move_print(Move *m);
 
+/**
+ * Like Move_print(Move*), but with color.
+ */
+void Move_print_color(Move *m, int color);
+
 void Move_print_all(Move *head);
 
 /**

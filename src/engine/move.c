@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "board.h"
+#include "color.h"
 #include "common.h"
 #include "datatypes.h"
-#include "piece.h"
-#include "board.h"
 #include "move.h"
+#include "piece.h"
 
 Move *Move_create(int color, int x, int y, int xx, int yy, int promotion) {
 	Move *m = malloc(sizeof(Move));
@@ -62,7 +63,7 @@ int Move_compare(Move *m1, Move *m2) {
 
 void Move_print(Move *m) {
 	if (m->promotion == 0) {
-		printf("%c%d-%c%d\n", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy);
+		printf("%c%d-%c%d", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy);
 	} else {
 		char prom;
 		switch(m->promotion) {
@@ -72,8 +73,14 @@ void Move_print(Move *m) {
 		default:
 		case QUEEN:		prom = 'Q';	break;
 		}
-		printf("%c%d-%c%d%c\n", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy, prom);
+		printf("%c%d-%c%d%c", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy, prom);
 	}
+}
+
+void Move_print_color(Move *m, int color) {
+	printf(color == WHITE ? color_white : color_black);
+	Move_print(m);
+	printf(resetcolor);
 }
 
 void Move_print_all(Move *head) {

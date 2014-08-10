@@ -4,20 +4,22 @@ CC = gcc
 all: executable
 
 # compiler flags:
-#	-O4							maximum optimization level I've made it work with
+#	-On							optimization level
 # 	-lpthread					enables multithreading
 # 	-finput-charset=UTF-8 		enabled UTF-8 support
 # 	-std=c99 -pedantic -ansi	sets a 'clean' C99 mode
 # 	-Wall						shows all warnings
 ifeq ($(OS),Windows_NT)
     # Windows (without multithreading)
-    CFLAGS = -finput-charset=UTF-8 -Wall -O4
+    CFLAGS = -finput-charset=UTF-8 -Wall -O3
 else
     # Linux (with multithreading)
-    CFLAGS = -lpthread -finput-charset=UTF-8 -Wall -O4
+    CFLAGS = -lpthread -finput-charset=UTF-8 -Wall -O3
 endif
 
-# debugging
+# debugging flags:
+#	-DDEBUG			enables #define DEBUG
+# 	-g 				enables gdb debugging
 debug: CFLAGS += -DDEBUG -g
 debug: executable
 

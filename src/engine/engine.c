@@ -3,17 +3,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "board.h"
+#include "color.h"
 #include "common.h"
 #include "datatypes.h"
-#include "piece.h"
-#include "board.h"
-#include "move.h"
-#include "fitness.h"
 #include "engine.h"
+#include "fitness.h"
+#include "move.h"
+#include "piece.h"
 #include "validator.h"
 
 #ifdef THREADS
 #include <pthread.h>
+#include <unistd.h>
 #endif
 
 /**
@@ -36,13 +38,13 @@ typedef struct ThreadData {
  */
 static void print_depth(int depth) {
 	if (depth == 1) {
-		printf("    ");
+		printf("\n.   .   ");
 	} else if (depth == 2) {
-		printf("   ");
+		printf("\n.   ");
 	} else if (depth == 3) {
-		printf("  ");
-	} else if (depth == 4) {
-		printf(" ");
+		printf("\n.");
+	} else {
+		printf("\n");
 	}
 }
 
@@ -237,11 +239,6 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 	}
 #endif
 
-	// Sort the combined results. Best one first, thats the
-	// highest in case of player=white
-	//sort(head, color, total);
-	//return head[0];
-
 	// Find the highest item:
 	int white = (color == WHITE);
 	int best = 0;
@@ -279,10 +276,15 @@ void *evaluate_moves(void *threadarg) {
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
 		if (DRAW_MOVES) {
-			printf("[%d-%d:%d] %c%d-%c%d\n",
+			printf("\n[%d-%d:%d] %s%c%d-%c%d%s\n",
 				data->from, data->to, i,
-				data->head[i]->x + 'a', 8 - data->head[i]->y, data->head[i]->xx + 'a', 8 - data->head[i]->yy);
-			//Move_print(data->head[i]);
+				white ? color_white : color_black,
+				data->head[i]->x + 'a', 8 - data->head[i]->y,
+				data->head[i]->xx + 'a', 8 - data->head[i]->yy,
+				resetcolor);
+		} else if (DRAW_ALL_MOVES) {
+			printf("\n");
+			Move_print_color(data->head[i], data->color);
 		}
 		// Perform the move
 		UndoableMove *umove = Board_do_move(data->board, data->head[i]);
@@ -293,6 +295,12 @@ void *evaluate_moves(void *threadarg) {
 			data->head[i]->gives_check_mate = true;
 		} else if (ab[1] == STALE_MATE) {
 			data->head[i]->gives_draw = true;
+		}
+
+		if (DRAW_ALL_MOVES) {
+			printf("\n");
+			Move_print_color(data->head[i], data->color);
+			printf(" %s(%d)%s", white ? color_white : color_black, result, resetcolor);			
 		}
 
 		// Check for alpha/beta cut-offs
@@ -321,7 +329,7 @@ void *evaluate_moves(void *threadarg) {
 				printf("  Considering ");
 				Move_print(data->head[i]);
 			}
-		} else if (draw_progress) {
+		} else if (!DRAW_ALL_MOVES && draw_progress) {
 			printf(".");
 			fflush(stdout);
 		}
@@ -343,6 +351,12 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 			stats->boards_evaluated++;
 			result[0] = Board_evaluate(board);
 			result[1] = 0;
+			if (DRAW_ALL_MOVES) {
+				printf(" %s(%d)%s", WHITE ? color_white : color_black, result[0], resetcolor);
+			}
+			// Give processor some breathing room
+			// TODO disabled because it messes up the time measurements.
+			//usleep(100);
 			return result;
 		}
 	}
@@ -372,9 +386,9 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 	quiescence_score /= 2;
 	Move *curr = moves;
 	while (curr) {
-		if (DRAW_ALL_MOVES && depth > 1) {
+		if (DRAW_ALL_MOVES) {
 			print_depth(depth);
-			Move_print(curr);
+			Move_print_color(curr, color);
 		}
 
 		UndoableMove *umove = Board_do_move(board, curr);
@@ -395,10 +409,11 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 		}
 		int result = ab[0];
 		Board_undo_move(board, umove);
-		if (DRAW_ALL_MOVES) {
+		if (DRAW_ALL_MOVES && depth > 1) {
 			print_depth(depth);
 			curr->fitness = result;
-			Move_print(curr);
+			Move_print_color(curr, color);
+			printf(" %s(%d)%s", color==WHITE ? color_white : color_black, result, resetcolor);
 		}
 
 		// The crux of the alpha-beta algorithm:
@@ -406,24 +421,16 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 		// of a branch is already higher than the maximum of another
 		if (color == WHITE) {
 			if (result > alpha) {
-				// print_depth(depth);
-				// printf("W result %d > alpha %d -> alpha = result\n", result, alpha);
 				alpha = result;
 			}
 			if (alpha >= beta) {
-				// print_depth(depth);
-				// printf("W alpha %d > beta %d -> break;\n", alpha, beta);
 				break;
 			}
 		} else {
 			if (result < beta) {
-				// print_depth(depth);
-				// printf("B result %d < beta %d -> beta = result\n", result, beta);
 				beta = result;
 			}
 			if (alpha >= beta) {
-				// print_depth(depth);
-				// printf("B alpha %d > beta %d -> break;\n", alpha, beta);
 				break;
 			}
 		}
@@ -492,36 +499,6 @@ void selective_sort(Move **head, bool white, int from, int to, int n) {
 	}
 	head[to-1]->next_sibling = NULL;	
 }
-
-/*
-void sort(Move **head, int color, int total) {
-	int white = (color == WHITE);
-	int sorted = false;
-	int i;
-	///////////
-	//printf("\nBefore sorting:\n");
-	//Move_print_all(head[0]);
-	// Bubble-sorting in O(too much)
-	while(!sorted) {
-		sorted = true;
-		for(i = 0; i < total - 1; i++) {
-			// Compare items, swap if necessary
-			if ((white && head[i]->fitness < head[i+1]->fitness)
-					|| (!white && head[i]->fitness > head[i+1]->fitness)) {
-				sorted = false;
-				Move *temp = head[i];
-				head[i] = head[i+1];
-				head[i+1] = temp;
-			}
-		}
-	}
-	// Fix pointers again
-	for (i = 0; i < total - 1; i++) {
-		head[i]->next_sibling = head[i+1];
-	}
-	head[total-1]->next_sibling = NULL;
-}
-*/
 
 static void create_shuffled_array(Move **arr, Move *head, int total) {
 	Move *curr = head;

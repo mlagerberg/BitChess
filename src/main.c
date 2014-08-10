@@ -16,7 +16,6 @@
 #include "engine/engine.h"
 #include "engine/stats.h"
 #include "engine/files.h"
-#include "debug.h"
 #include "tests.h"
 #ifdef UNICODE_FIX
 #include <windows.h>

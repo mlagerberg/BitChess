@@ -2,12 +2,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "board.h"
+#include "color.h"
 #include "common.h"
 #include "datatypes.h"
-#include "piece.h"
-#include "board.h"
-#include "move.h"
 #include "fitness.h"
+#include "move.h"
+#include "piece.h"
 
 /**
  * Reads to chars from the file into the buffer,
@@ -119,7 +120,7 @@ void Board_reset(Board *b) {
 }
 
 #ifdef UNICODE_OUTPUT
-void Board_print(Board *b, int player) {
+void Board_print_old(Board *b, int player) {
 	int i,j,row,col;
 	if (player == WHITE) {
 		printf("    A   B   C   D   E   F   G   H\n");
@@ -162,6 +163,80 @@ void Board_print(Board *b, int player) {
 		printf("    A   B   C   D   E   F   G   H\n");
 	} else {
 		printf("    H   G   F   E   D   C   B   A\n");
+	}
+
+	if (b->state != UNFINISHED) {
+		switch(b->state) {
+		case WHITE_WINS:
+			printf("\nWhite wins!\n");
+			break;
+		case BLACK_WINS:
+			printf("\nBlack wins!\n");
+			break;
+		case DRAW:
+			printf("\nGame ended in a draw.\n");
+			break;
+		case STALE_MATE:
+			printf("\nStale mate!\n");
+			break;
+		}
+	}
+}
+
+void Board_print(Board *b, int player) {
+	int i,j,row,col;
+	char *tile1, *tile2;
+	if (player == WHITE) {
+		printf("     A    B    C    D    E    F    G    H\n");
+		tile1 = TILE_WHITE;
+		tile2 = TILE_BLACK;
+	} else {
+		printf("     H    G    F    E    D    C    B    A\n");
+		tile2 = TILE_WHITE;
+		tile1 = TILE_BLACK;
+	}
+	printf("   %s     %s     %s     %s     %s     %s     %s     %s     %s\n"
+			, tile1,tile2,tile1,tile2,tile1,tile2,tile1,tile2,resetcolor);
+	for (i = 0; i < 8; i++) {
+		if (i > 0) {
+			printf("   %s     %s     %s     %s     %s     %s     %s     %s     %s \n"
+					, tile1,tile2,tile1,tile2,tile1,tile2,tile1,tile2,resetcolor);
+		}
+		if (player == WHITE) {
+			printf("%c", '8' - i);
+		} else {
+			printf("%c", '1' + i);
+		}
+		for (j = 0; j < 8; j++) {
+			printf("  %s  ", j % 2 == 0 ? tile1 : tile2);
+			if (player == WHITE) {
+				row = i; col = j;
+			} else {
+				row = 7-i; col = 7-j;
+			}
+			Piece_print(b->fields[col][row]);
+		}
+		if (player == BLACK) {
+			printf("  %s  %c  ", resetcolor, '1' + i);
+		} else {
+			printf("  %s  %c  ", resetcolor, '8' - i);
+		}
+		if (i == 0) {
+			Board_print_captures(b, -player);
+		} else if (i == 7) {
+			Board_print_captures(b, player);
+		}
+		printf("\n");
+		printf("   %s     %s     %s     %s     %s     %s     %s     %s     %s \n"
+					, tile1,tile2,tile1,tile2,tile1,tile2,tile1,tile2,resetcolor);
+		char *t = tile2;
+		tile2 = tile1;
+		tile1 = t;
+	}
+	if (player == WHITE) {
+		printf("     A    B    C    D    E    F    G    H\n");
+	} else {
+		printf("     H    G    F    E    D    C    B    A\n");
 	}
 
 	if (b->state != UNFINISHED) {
