@@ -9,6 +9,7 @@
 #include "datatypes.h"
 #include "engine.h"
 #include "fitness.h"
+#include "heuristics.h"
 #include "move.h"
 #include "piece.h"
 #include "validator.h"
@@ -74,8 +75,11 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
  * Parameters:
  * - *board 	- the board to perform a move on. Must be reset to it's original state before finishing.
  * - *stats 	- performance stats, will be adjusted.
+ * - dist 		- distance from root. Like the reverse of depth
  * - depth 		- remaining ply depth. When combined with extra_depth this is below minimum,
  * 				  the search will not branch further.
+ * - extra depth- when quiescence score determines that a deeper search is reguired,
+ *				  the value of this paramter is increased.
  * - quiescence_score
  * 				- indicates if the current branch is 'quiet' or not. When this value is above a
  *                certain threshold the branch is considered volatile and will be
@@ -83,12 +87,13 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
  * - alpha 		- alpha cutoff value
  * - beta 		- beta cutoff value
  * - color 		- current turn
+ * - *killers	- array with pointers to killer moves.
  *
  * Returns an array: {fitness, state} where fitness is the eventual board position value
  * and state is either 1 if the move results directly in check mate, 2 if it directly
  * results in stale mate, and 0 otherwise.
  */
-static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color);
+static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]);
 
 /**
  * Creates an array of pointers to the moves, so that
@@ -97,34 +102,6 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
  * The array is shuffled and put into the first parameter.
  */
 static void create_shuffled_array(Move **out, Move *head, int total);
-
-/**
- * Sorts the list of moves by their fitness value.
- * For white, highest fitness comes first, for black the lowest.
- * 
- * **head - First element of the list
- * color  - Current player, black or white, because this determines the sort order
- * total  - total number of moves in the list
- */
-//static void sort(Move **head, int color, int total);
-
-/**
- * Partially sort a list of moves by their heuristic value
- * by putting the best `n` items at the front and ignoring the rest.
- * For white the highest comes first, for black the lowest.
- * 
- * **head - First element of the list
- * white  - True if sorting for white, false otherwise
- * from   - Start boundary from where the sorting should start
- * to     - End boundary from where the sorting should stop
- * n      - how many items (maximum) should be sorted to the start of the list.
- */
-static void selective_sort(Move **head, bool white, int from, int to, int n);
-
-/**
- * Swaps two elements in a list of moves
- */
-static void swap(Move **head, int i, int j);
 
 /**
  * Wether or not to print progress.
@@ -156,7 +133,6 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	// Make array and shuffle it:
 	Move **arr = calloc(1,sizeof(Move) * total);
 	create_shuffled_array(arr, head, total);
-
 	// Find the best move:
 	head = get_best_move(board, stats, color, ply_depth, arr, total);
 	if (DRAW_STATS || verbosity > 1) {
@@ -263,13 +239,11 @@ void *evaluate_moves(void *threadarg) {
 	bool white = (data->color == WHITE);
 	int best_fitness = white ? MIN_FITNESS : MAX_FITNESS;
 	int i;
+	unsigned int killers[MAX_PLY_DEPTH + MAX_EXTRA_PLY_DEPTH] = { 0 };
 
 	if (DRAW_MOVES) {
 		printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
 	}
-
-	// Sort the ones with the best heuristic to the front
-	selective_sort(data->head, white, data->from, data->to, 5);
 
 	int alpha = MIN_FITNESS;
 	int beta = MAX_FITNESS;
@@ -285,11 +259,20 @@ void *evaluate_moves(void *threadarg) {
 		} else if (DRAW_ALL_MOVES) {
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
+			printf(" >");
 		}
 		// Perform the move
 		UndoableMove *umove = Board_do_move(data->board, data->head[i]);
 		// Recurse!
-		int * ab = alpha_beta(data->board, data->stats, data->ply_depth-1, 0, 0, alpha, beta, -data->color);
+		int * ab = alpha_beta(
+				data->board,
+				data->stats,
+				1,
+				data->ply_depth-1,
+				0, 0,
+				alpha, beta,
+				-data->color,
+				killers);
 		int result = ab[0];
 		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
 			data->head[i]->gives_check_mate = true;
@@ -300,7 +283,7 @@ void *evaluate_moves(void *threadarg) {
 		if (DRAW_ALL_MOVES) {
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
-			printf(" %s(%d)%s", white ? color_white : color_black, result, resetcolor);			
+			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);			
 		}
 
 		// Check for alpha/beta cut-offs
@@ -339,7 +322,7 @@ void *evaluate_moves(void *threadarg) {
 }
 
 
-static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color) {
+static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
 	static int result[2];
 
 	stats->moves_count++;
@@ -352,7 +335,7 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 			result[0] = Board_evaluate(board);
 			result[1] = 0;
 			if (DRAW_ALL_MOVES) {
-				printf(" %s(%d)%s", WHITE ? color_white : color_black, result[0], resetcolor);
+				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
 			}
 			// Give processor some breathing room
 			// TODO disabled because it messes up the time measurements.
@@ -362,7 +345,7 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 	}
 
 	bool at_check = v_king_at_check(board, color);
-	Move *moves = calloc(1,sizeof(Move));	
+	Move *moves = calloc(1,sizeof(Move));
 	v_get_all_valid_moves_for_color(&moves, board, color);
 	if (moves == NULL || Move_is_nullmove(moves)) {
 		if (at_check) {
@@ -382,6 +365,9 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 		return result;
 	}
 
+	// Sort the killer move to the front
+	Heuristics_reorder(killers, dist, &moves);
+
 	// Important not to count too old events:
 	quiescence_score /= 2;
 	Move *curr = moves;
@@ -389,6 +375,7 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 		if (DRAW_ALL_MOVES) {
 			print_depth(depth);
 			Move_print_color(curr, color);
+			printf(" >");
 		}
 
 		UndoableMove *umove = Board_do_move(board, curr);
@@ -396,12 +383,14 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 		int * ab = alpha_beta(
 				board,
 				stats,
-				depth-1,
+				dist + 1,
+				depth - 1,
 				at_check && extra_depth < MAX_EXTRA_PLY_DEPTH ? extra_depth + 1 : extra_depth,
 				quiescence_score + score,
 				alpha,
 				beta,
-				-color);
+				-color,
+				killers);
 		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
 			curr->gives_check_mate = true;
 		} else if (ab[1] == STALE_MATE) {
@@ -413,7 +402,7 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 			print_depth(depth);
 			curr->fitness = result;
 			Move_print_color(curr, color);
-			printf(" %s(%d)%s", color==WHITE ? color_white : color_black, result, resetcolor);
+			printf(" %s< %d%s", color==WHITE ? color_white : color_black, result, resetcolor);
 		}
 
 		// The crux of the alpha-beta algorithm:
@@ -424,6 +413,8 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 				alpha = result;
 			}
 			if (alpha >= beta) {
+				//printf("%s*%s", red, resetcolor);
+				Heuristics_produced_cutoff(killers, dist, curr);
 				break;
 			}
 		} else {
@@ -431,6 +422,8 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 				beta = result;
 			}
 			if (alpha >= beta) {
+				//printf("%s*%s", red, resetcolor);
+				Heuristics_produced_cutoff(killers, dist, curr);
 				break;
 			}
 		}
@@ -447,58 +440,6 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 	return result;
 }
 
-
-void swap(Move **head, int a, int b) {
-	Move *temp = head[a];
-	head[a] = head[b];
-	head[b] = temp;
-}
-
-
-void selective_sort(Move **head, bool white, int from, int to, int n) {
-	int i, j;
-	if (to - from > n) {
-		n = to - from;
-	}
-	// Sort first n items
-	for(i = from + 1; i < n; i++) {
-		j = i;
-		while ((white && head[j]->heuristic > head[j-1]->heuristic)
-				|| (!white && head[j]->heuristic < head[j-1]->heuristic)) {
-			swap(head, j, j-1);
-			j--;
-			if (j == 0) {
-				break;
-			}
-		}
-	}
-	// Lowest heuristic of n highest heuristics
-	int topMin = head[n]->heuristic;
-	for(i = n; i < to; i++) {
-		if ((white && head[i]->heuristic > topMin)
-				|| (!white && head[i]->heuristic < topMin)) {
-			// i should be in the top. Move it there:
-			swap(head, i, n);
-			// And bubble it up if needed
-			j = n;
-			while ((white && head[j]->heuristic > head[j-1]->heuristic)
-					|| (!white && head[j]->heuristic < head[j-1]->heuristic)) {
-				swap(head, j, j-1);
-				j--;
-				if (j == 0) {
-					break;
-				}
-			}
-			topMin = head[n]->heuristic;
-		}
-	}
-
-	// Fix pointers
-	for (i = from; i < to - 1; i++) {
-		head[i]->next_sibling = head[i+1];
-	}
-	head[to-1]->next_sibling = NULL;	
-}
 
 static void create_shuffled_array(Move **arr, Move *head, int total) {
 	Move *curr = head;

@@ -27,7 +27,7 @@ debug: executable
 TARGET = chess
 
 # source files:
-SOURCE = src/engine/piece.c src/engine/square.c src/engine/board.c src/engine/move.c src/engine/algebraicnotation.c src/engine/simplenotation.c src/engine/validator.c src/engine/fitness.c src/engine/engine.c src/engine/files.c src/debug.c src/tests.c src/main.c
+SOURCE = src/debug.c src/main.c src/tests.c src/engine/algebraicnotation.c src/engine/board.c src/engine/engine.c src/engine/files.c src/engine/fitness.c src/engine/heuristics.c src/engine/move.c src/engine/piece.c src/engine/simplenotation.c src/engine/square.c src/engine/validator.c
 
 
 executable: $(SOURCE)

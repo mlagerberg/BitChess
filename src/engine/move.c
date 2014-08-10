@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,6 +60,15 @@ bool Move_equals(Move *m1, Move *m2) {
 
 int Move_compare(Move *m1, Move *m2) {
 	return m1->fitness - m2->fitness;
+}
+
+unsigned int Move_get_as_int(Move *m) {
+	unsigned int r = 0;
+	r |= (((char) m->x) << 24);
+	r |= (((char) m->y) << 16);
+	r |= (((char) m->x) << 8);
+	r |= (char) m->x;
+	return r;
 }
 
 void Move_print(Move *m) {

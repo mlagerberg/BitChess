@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include "datatypes.h"
 
 /**
@@ -34,6 +35,8 @@ void Move_destroy(Move *m);
 inline bool Move_is_nullmove(Move *m);
 
 inline bool Move_equals(Move *m1, Move *m2);
+
+unsigned int Move_get_as_int(Move *m);
 
 /**
  * This is just a simple toString method.
