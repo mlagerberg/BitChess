@@ -191,7 +191,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 		data.ply_depth = ply_depth;
 		data.head = head;
 		data.from = 0;
-		data.to = total;
+		data.to = total - 1;
 		evaluate_moves(&data);
  	}
 
@@ -394,7 +394,6 @@ static int * alpha_beta(Board *board, Stats *stats, int depth, int extra_depth, 
 			curr->gives_draw = true;
 		}
 		int result = ab[0];
-		//free(ab);
 		Board_undo_move(board, umove);
 		if (DRAW_ALL_MOVES) {
 			print_depth(depth);
