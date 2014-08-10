@@ -166,7 +166,7 @@ int Fitness_calculate(Board *board) {
 			} else if (piece->shape == BISHOP) {
 				result += piece->color * MATERIAL_VALUE[BISHOP];
 				// Reward Bishop when mobility is high
-				int mobility = v_get_valid_move_count_for_piece(board, i, j);
+				int mobility = v_get_rough_move_count_for_piece(board, i, j);
 				int bonus = 0;
 				if (mobility >= 12) {
 					bonus = BISHOP_MAX_MOB_BONUS;
@@ -183,7 +183,7 @@ int Fitness_calculate(Board *board) {
 			} else if (piece->shape == ROOK) {
 				result += piece->color * MATERIAL_VALUE[ROOK];
 				// Reward Rook when mobility is high
-				int mobility = v_get_valid_move_count_for_piece(board, i, j);
+				int mobility = v_get_rough_move_count_for_piece(board, i, j);
 				int bonus = 0;
 				if (mobility >= 12) {
 					bonus = ROOK_MAX_MOB_BONUS;

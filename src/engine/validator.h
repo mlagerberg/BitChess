@@ -35,8 +35,10 @@ bool v_king_at_check(Board *board, int color);
 
 /**
  * Returns the number of valid moves for the piece at the given field.
+ * Does NOT check whether the moves are completely valid, i.e.
+ * they might put their own King in check.
  */
-int v_get_valid_move_count_for_piece(Board *board, int x, int y);
+int v_get_rough_move_count_for_piece(Board *board, int x, int y);
 
 /**
  * Returns false if the given square is save for the King to stand on.

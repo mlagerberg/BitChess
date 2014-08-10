@@ -244,13 +244,8 @@ bool v_square_gives_check(Board *board, int x, int y, int color) {
 }
 
 
-int v_get_valid_move_count_for_piece(Board *board, int x, int y) {
-	int count = 0;
-	Move *validmoves = calloc(1,sizeof(Move));
-	// TODO there must be a faster way of doing this
-	count = get_all_valid_moves_of_piece(&validmoves, board, x, y, true);
-	Move_destroy(validmoves);
-	return count;
+int v_get_rough_move_count_for_piece(Board *board, int x, int y) {
+	return get_all_valid_moves_of_piece(NULL, board, x, y, true);
 }
 
 
@@ -309,6 +304,13 @@ static int get_all_valid_moves_of_piece(Move **head, Board *board, int i, int j,
 		count = get_valid_moves_king(head, board, i, j, piece->color);
 	}
 
+	// When only_count enabled, skip the expensive checks and
+	// immediately return the rough estimate.
+	if (head == NULL) {
+		assert(only_count);
+		return count;
+	}
+
 	// Remove the moves that put the king in check
 	Move *curr = *head;
 	Move *prev = NULL;
@@ -326,16 +328,8 @@ static int get_all_valid_moves_of_piece(Move **head, Board *board, int i, int j,
 			count--;
 		} else {
 			// Remember which ones put opponent in check
-			if (!only_count) {
-				//bool no_counter = allows_counter_move(board, curr, -piece->color);
-				if (gives_check(board, curr, -piece->color)) {
-					curr->gives_check = true;
-					// if (no_counter) {
-					// 	curr->gives_mate = true;
-					// }
-				// } else if (no_counter) {
-				// 	curr->gives_tie = true;
-				}
+			if (!only_count && gives_check(board, curr, -piece->color)) {
+				curr->gives_check = true;
 			}
 			prev = curr;
 		}
@@ -347,11 +341,14 @@ static int get_all_valid_moves_of_piece(Move **head, Board *board, int i, int j,
 
 
 static void add_move(Move **head, Move *move) {
-	// List is empty
-	if (Move_is_nullmove(*head)) {
+	// Case 1: not adding moves, just counting.
+	if (head == NULL) {
+		return;
+	// Case 2: List is empty. Insert move as first item.
+	} else if (Move_is_nullmove(*head)) {
 		Move_destroy(*head);
 		*head = move;
-	// Else, insert *before* head
+	// Case 3: insert move *before* head
 	} else {
 		move->next_sibling = *head;
 		*head = move;
@@ -360,7 +357,9 @@ static void add_move(Move **head, Move *move) {
 
 
 static void add_move_pawn(Move **head, int color, int x, int y, int xx, int yy) {
-	if (yy == 7 || yy == 0) {
+	if (head == NULL) {
+		return;
+	} else if (yy == 7 || yy == 0) {
 		add_move(head, Move_create(color, x, y, xx, yy, QUEEN));
 		add_move(head, Move_create(color, x, y, xx, yy, KNIGHT));
 	} else {

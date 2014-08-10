@@ -141,19 +141,19 @@ typedef struct Move {
 	uint8_t x, y;
 	/// Target file and rank
 	uint8_t xx, yy;
-	uint8_t is_castling;
-	uint8_t is_en_passant;
-	uint8_t gives_check;
-	uint8_t gives_draw;
-	uint8_t gives_check_mate;
-	// Only used when pawn reaches other side of the board, e.g. QUEEN or KNIGHT
+	bool is_castling;
+	bool is_en_passant;
+	bool gives_check;
+	bool gives_draw;
+	bool gives_check_mate;
+	/// `true` if the player is at check before making this move.
+	bool is_evasion;
+	/// Only used when pawn reaches other side of the board, e.g. QUEEN or KNIGHT
 	uint8_t promotion;
-	// Fitness value of the move. The higher the better for white, the lower the better for black.
+	/// Fitness value of the move. The higher the better for white, the lower the better for black.
 	int fitness;
-	// Heuristic used in move reduction. The higher the better this move is probably going to be for white. 
-	int heuristic;
-	// When generating possible moves, this'll point to the next in line.
-	// So, it does NOT point to the next (opponent's) move!
+	/// When generating possible moves, this'll point to the next in line.
+	/// So, it does NOT point to the next (opponent's) move!
 	struct Move *next_sibling;
 } Move;
 
