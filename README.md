@@ -63,7 +63,6 @@ I'd say 98% finished regarding game correctness. The following should be added f
 - respect a chess clock.
 
 For performance, I'd really like to see the following added as well:
-- use dynamic search depth for promising moves,
 - improve alpha-beta pruning to not only cut off the search in the current chunk, but in other chunks as well (the set of possible moves is split into a few chunks which are searched and evaluated in parallel)
 - use a opening book at the start,
 - use end-game tables or otherwise improve the end game (it is *terrible* at the moment),
@@ -73,8 +72,9 @@ For performance, I'd really like to see the following added as well:
 
 ## Building
 
-Simply run `make` to build on Linux or Windows. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+Simply run `make` to build on Linux or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
 
+[1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/
 
 
 ## Why this project?
