@@ -20,9 +20,9 @@ Move *Move_create(int color, int x, int y, int xx, int yy, int promotion) {
 	m->gives_check = false;
 	m->gives_draw = false;
 	m->gives_check_mate = false;
+	m->is_evasion = false;
 	m->promotion = promotion;
 	m->fitness = (color == WHITE ? MIN_FITNESS : MAX_FITNESS);
-	m->heuristic = 0;
 	m->next_sibling = NULL;
 	return m;
 }
@@ -30,12 +30,12 @@ Move *Move_create(int color, int x, int y, int xx, int yy, int promotion) {
 Move *Move_clone(Move *move) {
 	Move *clone = Move_create(0, move->x, move->y, move->xx, move->yy, move->promotion);
 	clone->fitness = move->fitness;
-	clone->heuristic = move->heuristic;
 	clone->is_castling = move->is_castling;
 	clone->is_en_passant = move->is_en_passant;
 	clone->gives_check = move->gives_check;
 	clone->gives_draw = move->gives_draw;
 	clone->gives_check_mate = move->gives_check_mate;
+	clone->is_evasion = move->is_evasion;
 	return clone;
 }
 
