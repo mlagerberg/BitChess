@@ -251,6 +251,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		// No game? Can't play.
 		if (!has_game(true)) {
+			fprintf(stderr, "No game present.\n");
 			return 1;
 		}
 		// Read game from file
