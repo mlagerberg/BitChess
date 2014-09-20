@@ -140,8 +140,9 @@ inline int Board_turn(Board *b);
 * Tests if the board equals another board. Note that this method is designed to
 * be used in checking whether a position occurs for the third time, so ply count
 * is ignored.
+* If `quick` is true, en passant and castling is also ignored.
 */
-bool Board_equals(Board *left, Board *right);
+bool Board_equals(bool quick, Board *left, Board *right);
 
 
 /**

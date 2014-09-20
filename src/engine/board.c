@@ -370,14 +370,17 @@ int Board_turn(Board *b) {
 	return b->ply_count % 2 == 0 ? WHITE : BLACK;
 }
 
-bool Board_equals(Board *left, Board *right) {
-	int ok = (left->white_can_castle_kings_side == right->white_can_castle_kings_side)
+bool Board_equals(bool quick, Board *left, Board *right) {
+	int ok = quick ||
+			((left->white_can_castle_kings_side == right->white_can_castle_kings_side)
 			 && (left->white_can_castle_queens_side == right->white_can_castle_queens_side)
 			 && (left->black_can_castle_kings_side == right->black_can_castle_kings_side)
 			 && (left->black_can_castle_queens_side == right->black_can_castle_queens_side)
 			 && (left->white_can_en_passant == right->white_can_en_passant)
-			 && (left->black_can_en_passant == right->black_can_en_passant);
-	if (!ok) return false;
+			 && (left->black_can_en_passant == right->black_can_en_passant));
+	if (!ok) {
+		return false;
+	}
 	int i, j;
 	for (i = 0; i < 8; i++) {
 		for (j = 0;  j < 8; j++) {

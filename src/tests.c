@@ -14,7 +14,7 @@ int test_serializer(char *filename) {
 		Board *b = debug_generate_random();
 		Board_save(b, filename);
 		Board *b2 = Board_read(filename);
-		if (!Board_equals(b, b2)) {
+		if (!Board_equals(false, b, b2)) {
 			Board_print(b, WHITE);
 			Board_print(b2, WHITE);
 			printf("Test serializer: fail!\n");
@@ -37,7 +37,7 @@ int test_engine() {
 	int player = WHITE;
 	Move *move;
 	for (i = 0; i < 6; i++) {
-		move = Engine_turn(b, &stats, player, MAX_PLY_DEPTH, true);
+		move = Engine_turn(b, &stats, player, 3, true);
 		Board_do_move(b, move);
 		player = -player;
 	}
@@ -103,19 +103,20 @@ int test_validator() {
 
 int test_moves() {
 	Board *b, *backup;
-	Move *m[3];
+	Move *m[5];
 	UndoableMove *um = NULL;
 	int ok;
 	b = Board_create();
 	backup = Board_create();
 
+	// Prepare castling
+	m[0] = Move_create(WHITE, FILE_E, RANK_2, FILE_E, RANK_3, 0);
+	m[1] = Move_create(WHITE, FILE_F, RANK_1, FILE_B, RANK_5, 0);
+	m[2] = Move_create(WHITE, FILE_G, RANK_1, FILE_H, RANK_3, 0);
 	// Castling
-	m[0] = Move_create(0, FILE_F, RANK_1, FILE_F, RANK_3, 0);
-	m[1] = Move_create(0, FILE_G, RANK_1, FILE_G, RANK_3, 0);
-	m[2] = Move_create(0, FILE_E, RANK_1, FILE_G, RANK_1, 0);
-
-	// Capture:
-	//m[0] = Move_create(0, FILE_E, RANK_1, FILE_D, RANK_8, 0);
+	m[3] = Move_create(WHITE, FILE_E, RANK_1, FILE_G, RANK_1, 0);
+	// Capture
+	m[4] = Move_create(WHITE, FILE_B, RANK_5, FILE_D, RANK_7, 0);
 
 	// Do the moves
 	int MOVES = sizeof(m) / sizeof(m[0]);
@@ -136,7 +137,13 @@ int test_moves() {
 	}
 
 	// Check
-	ok = Board_equals(b, backup);
+	ok = Board_equals(true, b, backup);
+
+	printf("Test move and un-move: %s\n", ok ? "ok" : "fail");
+	if (!ok) {
+		Board_print(backup, WHITE);
+		Board_print(b, WHITE);
+	}
 
 	// Cleanup
 	for(i = 0; i < MOVES; i++) {
@@ -144,6 +151,5 @@ int test_moves() {
 	}
 	Board_destroy(b);
 
-	printf("Test move and un-move: %s\n", ok ? "ok" : "fail");
 	return ok;
 }

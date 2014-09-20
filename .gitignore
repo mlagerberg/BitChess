@@ -21,10 +21,14 @@
 *.i*86
 *.x86_64
 *.hex
+chess
 
 # Game files
 *.game
 *.moves
 .game.bak
 .moves.bak
+
+# Misc.
 notes.txt
+test.chess
