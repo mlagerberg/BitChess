@@ -1,2 +1,9 @@
 language: c
-install: make test
+
+os:
+  - linux
+
+compiler:
+  - gcc
+
+script: make test
