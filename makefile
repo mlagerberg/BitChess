@@ -16,7 +16,7 @@ TARGET = chess
 CFLAGS =  -finput-charset=UTF-8 -Wall -O3
 
 # Enable multithreading on Linux
-ifeq ($(OS),Linux)
+ifneq ($(OS),Windows_NT)
 	CFLAGS += -lpthread
 endif
 
