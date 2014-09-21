@@ -1,4 +1,3 @@
-
 BitChess
 ===========================
 
@@ -7,6 +6,7 @@ BitChess is a (very simple) CLI chess engine written in C.
 
 It is pretty much feature-complete (I think), relatively smart, and not all too slow. It's name is inspired by all the software that starts with 'bit' nowadays (Bitcoin, Bitbucket, Bit.ly, BIT.TRIP RUNNER) and should be pronounced as 'bitches'. Players of the game are to be referred to as '*playa's*'.
 
+[![Build Status](https://travis-ci.org/monkeyinmysoup/BitChess.svg?branch=master)](https://travis-ci.org/monkeyinmysoup/BitChess)
 
 ## Screenshots
 
