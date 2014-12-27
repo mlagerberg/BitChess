@@ -7,6 +7,7 @@
 #include "move.h"
 #include "board.h"
 #include "simplenotation.h"
+#include "validator.h"
 
 
 char * Simple_move_format(Board *board, Move *m) {
@@ -29,82 +30,33 @@ char * Simple_move_format(Board *board, Move *m) {
 	return move;
 }
 
-Move *Simple_move_parse(char *buf, Board *board) {
+Move *Simple_move_parse(char *str, Board *board) {
+	// Generate all moves:
+	Move *head = calloc(1,sizeof(Move));
 	int color = Board_turn(board);
-	int len = strlen(buf);
-	// Find castling
-	if (strcmp("O-O", buf) == 0 || strcmp("0-0", buf) == 0) {
-		if (color == WHITE) {
-			return Move_create(color, 4, 7, 6, 7, 0);
-		} else {
-			return Move_create(color, 4, 0, 6, 0, 0);
-		}
-	} else if (strcmp("O-O-O", buf) == 0 || strcmp("0-0-0", buf) == 0) {
-		if (color == WHITE) {
-			return Move_create(color, 4, 7, 2, 7, 0);
-		} else {
-			return Move_create(color , 4, 0, 2, 0, 0);
-		}
-	} else if (len == sizeof(char) * 2) {
-		// Shorthand form pawn move
-		int file2 = buf[0] - 'a';
-		int rank2 = 8 - (buf[1] - '0');
-		if (file2 < 0 || file2 > 7 || rank2 < 0 || rank2 > 7) {
-			fprintf(stderr, "Invalid move: source field is out of bounds.\n");
-			return NULL;
-		}
-		// Find source field
-		if (Board_is_at_safe(board, file2, rank2 + color, PAWN, color)) {
-			return Move_create(color, file2, rank2 + color, file2, rank2, 0);
-		} else if (Board_is_at_safe(board, file2, rank2 + 2 * color, PAWN, color)) {
-			return Move_create(color, file2, rank2 + 2 * color, file2, rank2, 0);
-		} else {
-			fprintf(stderr, "Invalid move: no pawn can move to field %s.\n", buf);
-			return NULL;
-		}
-	} else if (len == sizeof(char) * 3) {
-		// Shorthand form normal move, or pawn capture maybe? Or pawn + check ?
-		// TODO
-	} else if (len > sizeof(char) * 6) {
-		fprintf(stderr, "Invalid move: too long (max. 6 characters, like: c7-c8Q).\n");
+	int total = v_get_all_valid_moves_for_color(&head, board, color);
+	if (total == 0) {
 		return NULL;
-	} else {
-		int file = buf[0] - 'a';
-		int rank = 8 - (buf[1] - '0');
-		if (file < 0 || file > 7 || rank < 0 || rank > 7) {
-			fprintf(stderr, "Invalid move: source field is out of bounds.\n");
-			return NULL;
-		}
-		int file2 = buf[3] - 'a';
-		int rank2 = 8 - (buf[4] - '0');
-		if (file2 < 0 || file2 > 7 || rank2 < 0 || rank2 > 7) {
-			fprintf(stderr, "Invalid move: destination field is out of bounds.\n");
-			return NULL;
-		}
-		if (file == file2 && rank == rank2) {
-			fprintf(stderr, "Invalid move: source is the same as destination.\n");
-			return NULL;
-		}
-		
-		int shape = 0;
-		// check if buf[5] exist, and parse the piece in it (must be R,N,B or Q)
-		if (len == sizeof(char) * 6) {
-			switch(buf[5]) {
-			case 'R':
-				shape = ROOK;	break;
-			case 'N':
-				shape = KNIGHT;	break;
-			case 'B':
-				shape = BISHOP;	break;
-			case 'Q':
-				shape = QUEEN;	break;
-			default:
-				fprintf(stderr, "Invalid move: invalid promotion piece.\n");
-				return NULL;
-			}
-		}
-
-		return Move_create(color, file, rank, file2, rank2, shape);
 	}
+
+	int any = false;
+	Move *curr = head;
+	while (curr) {
+		char *move = Simple_move_format(board, curr);
+		if (strcmp(str, move) == 0) {
+			any = true;
+			free(move);
+			break;
+		}
+		free(move);
+		curr = curr->next_sibling;
+	}
+	// Make a copy, so the rest can easily be destroyed in 1 go:
+	if (any) {
+		Move *result = Move_clone(curr);
+		Move_destroy(head);
+		return result;
+	}
+
 	return NULL;
 }
