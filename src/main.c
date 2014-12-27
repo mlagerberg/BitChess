@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "gitversion.h"
 #include "engine/common.h"
 #include "engine/datatypes.h"
 #include "engine/board.h"
@@ -22,8 +23,7 @@
 #endif
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.0";
-const char* YEAR = "2014";
+const char* VERSION = "0.1.1";
 const char* AUTHOR = "Mathijs Lagerberg";
 const char* DEFAULT_FILE = ".game";
 const char* SLOT_FILE = "%d.game";
@@ -31,6 +31,7 @@ const char* SLOT_MOVES_FILE = "%d.moves";
 const char* BACKUP_FILE = ".game.bak";
 const char* DEFAULT_MOVES_FILE = ".moves";
 const char* BACKUP_MOVES_FILE = ".moves.bak";
+char* YEAR = &__DATE__[7];
 
 /**
  * Prints the version of this build and copyright information.
@@ -315,8 +316,19 @@ int main(int argc, char *argv[]) {
 }
 
 void version() {
-	printf("%s %s (c) %s by %s\n", APP, VERSION, YEAR, AUTHOR);
-	printf("Built: %s\n", __DATE__);
+#ifdef DEBUG
+	printf("%s %s-%s DEBUG (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
+#else
+	printf("%s %s-%s (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
+#endif
+	if (YEAR[2]=='1' && YEAR[3]=='4') {
+		// FIXME not failsafe for the year 2114, 2214, etc.
+		printf("Copyright %s %s.\n", YEAR, AUTHOR);
+	} else {
+		printf("Copyright 2014-%s %s.\n", YEAR, AUTHOR);
+	}
+	printf("This is free software, released under Apache 2.0 license.\n");
+	printf("The software is provided as is without any guarantees or warranty.\n");
 }
 
 void usage() {
