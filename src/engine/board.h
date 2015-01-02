@@ -3,7 +3,7 @@
 #include "datatypes.h"
 
 /**
- * board.h / board.h
+ * board.h / board.c
  * 
  * Representation of a board. Includes lists
  * of Pieces, lists of captured pieces, etc.

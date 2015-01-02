@@ -6,21 +6,23 @@
 #include <string.h>
 #include <time.h>
 #include "gitversion.h"
+#include "main.h"
+#include "tests.h"
+#include "engine/algebraicnotation.h"
+#include "engine/board.h"
 #include "engine/common.h"
 #include "engine/datatypes.h"
-#include "engine/board.h"
-#include "engine/move.h"
-#include "engine/simplenotation.h"
-#include "engine/algebraicnotation.h"
-#include "engine/piece.h"
-#include "engine/validator.h"
 #include "engine/engine.h"
-#include "engine/stats.h"
 #include "engine/files.h"
-#include "tests.h"
+#include "engine/move.h"
+#include "engine/piece.h"
+#include "engine/simplenotation.h"
+#include "engine/stats.h"
+#include "engine/validator.h"
 #ifdef UNICODE_FIX
 #include <windows.h>
 #endif
+
 
 const char* APP = "BitChess";
 const char* VERSION = "0.1.1";
@@ -33,80 +35,17 @@ const char* DEFAULT_MOVES_FILE = ".moves";
 const char* BACKUP_MOVES_FILE = ".moves.bak";
 char* YEAR = &__DATE__[7];
 
-/**
- * Prints the version of this build and copyright information.
- */
-void version();
-/**
- * Shows usage instructions.
- */
-void usage();
-/**
- * Checks if there's an ongoing game present.
- */
-int has_game(int show_error);
-/**
- * Backups an active game to .game.bak
- */
-void backup_game(bool whipe_clean);
-/**
- * Saves the board to file.
- */
-void save_game(Board *board);
-/**
- * Saves a list of moves to file.
- */
-void save_move(Board *board, Move *move);
-/**
- * Starts a new game. If user_color is left zero, a virtual
- * coin toss termines if the user plays white or black.
- */
-void new_game(int user_color);
-/**
- * Restarts the current game. The players keep their current side.
- */
-void restart_game();
-/**
- * Users change turns. The computer player will respond with a move.
- */
-void swap_sides();
-/**
- * Prints the current board.
- */
-void show_board();
-/**
- * Evaluates the current board for WHITE or BLACK
- * (depending on who's turn it is).
- */
-int evaluate();
-/**
- * Prints the given move and also returns the output.
- */
-char * print_move(Board *board, Move *move);
-/**
- * Parses a move from a string (shorthand notation)
- * and returns the Move (or NULL if no valid move).
- */
-Move *parse_move(char *str, Board *board);
-/**
- * Prints a list of valid moves.
- */
-void show_moves();
-/**
- * Saves a game to a backup slot,
- * returns success.
- */
-int backup_to_slot(int slot);
-/**
- * Restores a game from a backup slot,
- * returns success.
- */
-int restore_from_slot(int slot);
-/**
- * Parses the game slot from the arguments,
- * returns -1 if it fails.
- */
-int get_game_slot(char *arg);
+
+/// Level of verbosity. The higher the more output
+/// Silenced by using -s at the cli.
+static int verbosity = 2;
+/// If true, performs the move without having the AI player do a counter move.
+/// Enabled by using -x argument.
+static int no_counter = 0;
+/// Using the -m command, this toggles between shorthand (algebraic)
+/// and simple move notation.
+static bool algebraic = true;	
+
 
 // Prepares the Windows Command Prompt to show unicode characters
 #ifdef UNICODE_FIX
@@ -118,15 +57,6 @@ void fix_unicode() {
 	}
 }
 #endif
-
-/// Level of verbosity. The higher the more output
-/// Silenced by using -s at the cli.
-static int verbosity = 2;
-/// If true, performs the move without having the AI player do a counter move.
-/// Enabled by using -x argument.
-static int no_counter = 0;
-/// Using the -m command, this toggles between shorthand (algebraic) and simple move notation.
-static bool algebraic = true;	
 
 
 int main(int argc, char *argv[]) {
@@ -316,11 +246,11 @@ int main(int argc, char *argv[]) {
 }
 
 void version() {
-#ifdef DEBUG
-	printf("%s %s-%s DEBUG (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
-#else
-	printf("%s %s-%s (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
-#endif
+	#ifdef DEBUG
+		printf("%s %s-%s DEBUG (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
+	#else
+		printf("%s %s-%s (%s)\n", APP, VERSION, GIT_VERSION, __DATE__);
+	#endif
 	if (YEAR[2]=='1' && YEAR[3]=='4') {
 		// FIXME not failsafe for the year 2114, 2214, etc.
 		printf("Copyright %s %s.\n", YEAR, AUTHOR);
@@ -333,6 +263,12 @@ void version() {
 
 void usage() {
 	version();
+	// Hidden features:
+	//	     white 			Starts a new where the user plays white.
+	//	     black 			Starts a new where the user plays black.
+	//		 list			Shows the user's available moves.
+	//		evaluate 		Shows the board position evaluation of the current game.
+	
 	printf("\nusage:       chess [-s,-m,-x] <command>\n\n");
 	printf("commands and options:\n");
 	printf(" <move>       Make a move in an ongoing game. The computer player will respond\n");
@@ -344,10 +280,6 @@ void usage() {
 	printf(" new          Starts a new game, where a virtual coin toss determines who plays\n");
 	printf("              white. The game is stored in a file called .game in the current\n");
 	printf("              directory.\n");
-	// Hidden features:
-	//	     white 		  Starts a new where the user plays white.
-	//	     black 		  Starts a new where the user plays black.
-	//		 list		  Shows the user's available moves.
 	printf(" print        Shows the current board position.\n");
 	printf(" reset        Restarts an ongoing game.\n");
 	printf(" switch       Switches sides in an ongoing game. The computer player will make a\n");
@@ -356,7 +288,6 @@ void usage() {
 	printf("              Can be restored using the restore command.\n");
 	printf(" restore <n > Restores a backed-up game from the file with the given number <n>.\n");
 	printf("              Requires a <n>.game file to be present.\n");
-	//printf(" evaluate     Shows the board position evaluation of the current game.\n");
 	printf("-s            Silences output to only critical messages, such as moves.\n");
 	printf("-m            Uses simple move notation. When used, moves must be written like\n");
 	printf("              so: 'd7-d5'. No marks for pieces, captures or check are used.\n");
@@ -559,8 +490,14 @@ void show_moves() {
 	Move *curr = head;
 	int i = 1;
 	while (curr) {
-		char *move = AN_format(board, curr, false, false);
-		printf("%d. %s\n", i, move);
+		char *move;
+		if (algebraic) {
+			move = AN_format(board, curr, false, false);
+			printf("%d. %s\n", i, move);
+		} else {
+			move = Simple_move_format(board, curr);
+			printf("%s\n", move);
+		}
 		free(move);
 		curr = curr->next_sibling;
 		i++;
