@@ -10,13 +10,11 @@ It is pretty much feature-complete (I think), relatively smart, and not all too 
 
 ## Screenshots
 
-Running on a Raspberry Pi.
-Starting a new game:
+Starting a new game ang making a first move:
 
-![Starting a game. Virtual coin toss decides who plays white.](https://i.imgur.com/SjlRkk6.png)
+![Starting a game. Virtual coin toss decides who plays white.](http://i.imgur.com/7mLKXNN.gif)
 
-Making a move:
-
+And here is a screenshot of it running on a Raspberry Pi:
 ![Making a move](https://i.imgur.com/epdcOpj.png)
 
 
