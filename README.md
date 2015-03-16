@@ -70,9 +70,9 @@ For performance, I'd really like to see the following added as well:
 
 ## Building
 
-Simply run `make` to build on Linux or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+Simply run `make` to build on Linux, OS X or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
 
-[1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/
+[1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/, on Mac: install XCode.
 
 
 ## Why this project?

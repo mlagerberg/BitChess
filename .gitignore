@@ -33,3 +33,4 @@ src/gitversion.c
 # Misc.
 notes.txt
 test.chess
+.DS_Store

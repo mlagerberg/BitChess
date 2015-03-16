@@ -18,21 +18,28 @@ TARGET = chess
 # compiler flags:
 #	-On							optimization level
 #	-lpthread					enables multithreading
-#	-finput-charset=UTF-8		enabled UTF-8 support
+#	-finput-charset=UTF-8		enabled UTF-8 support (on Linux and Windows)
 #	-std=c99 -pedantic -ansi	sets a 'clean' C99 mode
 #	-Wall						shows all warnings
-CFLAGS =  -finput-charset=UTF-8 -Wall -O3
+CFLAGS =  -Wall -O3
 
 # Platform specific quirks:
-# - Linux gets multithreading, Windows doesn't.
+# - Unix gets multithreading, Windows doesn't.
+# - Mac doesn't need or understand the UTF-8 flag
 # - Windows gets -.exe in the executable filename.
-# - Linux echo: quotes, Windows echo: no quotes.
+# - Unix echo: quotes, Windows echo: no quotes.
 ifeq ($(OS),Windows_NT)
+	CFLAGS += -finput-charset=UTF-8 
 	BINARY = $(TARGET).exe
 	Q=
 	ESC="
-else
+else ($(OS),Darwin)
 	CFLAGS += -lpthread
+	BINARY = $(TARGET)
+	Q="
+	ESC=\"
+else
+	CFLAGS += -finput-charset=UTF-8 -lpthread
 	BINARY = $(TARGET)
 	Q="
 	ESC=\"
