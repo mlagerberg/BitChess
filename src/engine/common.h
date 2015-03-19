@@ -16,7 +16,7 @@
 	// Disabled threading on Win32 by not defining THREADS.
 	// Disabled utf8-output on win32 by not defining UNICODE_OUTPUT.
 	// Enable attempted unicode fix:
-	#define UNICODE_FIX	
+	#define UNICODE_FIX
 #else 
 	#define UNICODE_OUTPUT
 	#define THREADS

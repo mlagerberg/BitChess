@@ -25,14 +25,14 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.1";
+const char* VERSION = "0.1.2";
 const char* AUTHOR = "Mathijs Lagerberg";
-const char* DEFAULT_FILE = ".game";
-const char* SLOT_FILE = "%d.game";
-const char* SLOT_MOVES_FILE = "%d.moves";
-const char* BACKUP_FILE = ".game.bak";
-const char* DEFAULT_MOVES_FILE = ".moves";
-const char* BACKUP_MOVES_FILE = ".moves.bak";
+char* DEFAULT_FILE = "%d.game";
+char* SLOT_FILE = "%d.game";
+char* SLOT_MOVES_FILE = "%d.moves";
+char* BACKUP_FILE = ".game.bak";
+char* DEFAULT_MOVES_FILE = ".moves";
+char* BACKUP_MOVES_FILE = ".moves.bak";
 char* YEAR = &__DATE__[7];
 
 
@@ -66,6 +66,8 @@ int main(int argc, char *argv[]) {
 	#ifdef UNICODE_FIX
 	fix_unicode(); 
 	#endif
+	// Prepare filenames:
+	prepare_filenames();
 
 	// Only few arguments are allowed:
 	if (argc < 2 || argc > 3) {
@@ -552,4 +554,13 @@ int get_game_slot(char *arg) {
 		return 1;
 	}
 	return slot;
+}
+
+void prepare_filenames() {
+	DEFAULT_FILE = with_user_dir("%d.game");
+	SLOT_FILE = with_user_dir("%d.game");
+	SLOT_MOVES_FILE = with_user_dir("%d.moves");
+	BACKUP_FILE = with_user_dir(".game.bak");
+	DEFAULT_MOVES_FILE = with_user_dir(".moves");
+	BACKUP_MOVES_FILE = with_user_dir(".moves.bak");
 }

@@ -23,4 +23,14 @@ bool file_exists(const char *file, bool show_error);
  */
 bool copy_file(const char *old_filename, const char *new_filename);
 
+/**
+ * Returns the user's home directory path
+ */
+ char* user_dir();
+
+ /**
+  * Prepends the filename with the user's home dir path
+  */
+ char* with_user_dir(char* filename);
+
 #endif

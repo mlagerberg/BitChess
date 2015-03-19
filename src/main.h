@@ -85,5 +85,9 @@ int restore_from_slot(int slot);
  * returns -1 if it fails.
  */
 int get_game_slot(char *arg);
+/**
+ * Prepares the filenames by prepending the user's home dir
+ */
+void prepare_filenames();
 
 #endif
