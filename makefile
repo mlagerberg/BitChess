@@ -28,12 +28,13 @@ CFLAGS =  -Wall -O3
 # - Mac doesn't need or understand the UTF-8 flag
 # - Windows gets -.exe in the executable filename.
 # - Unix echo: quotes, Windows echo: no quotes.
+OS := $(shell uname)
 ifeq ($(OS),Windows_NT)
 	CFLAGS += -finput-charset=UTF-8 
 	BINARY = $(TARGET).exe
 	Q=
 	ESC="
-else ($(OS),Darwin)
+else ifeq ($(OS),Darwin)
 	CFLAGS += -lpthread
 	BINARY = $(TARGET)
 	Q="
@@ -44,7 +45,6 @@ else
 	Q="
 	ESC=\"
 endif
-
 
 all: clean executable
 
