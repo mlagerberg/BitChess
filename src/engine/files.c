@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include "common.h"
 #include "files.h"
 
@@ -67,7 +68,7 @@ char* user_dir() {
 			strcpy(HOME_DIR, homedrive);
 			strcat(HOME_DIR, homepath);
 		} else {
-			HOME_DIR = strdup(getenv(USERPROFILE));
+			HOME_DIR = strdup(getenv("USERPROFILE"));
 		}
 	}
 	return HOME_DIR;
