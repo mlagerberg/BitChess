@@ -29,8 +29,8 @@ CFLAGS =  -Wall -O3
 # - Windows gets -.exe in the executable filename.
 # - Unix echo: quotes, Windows echo: no quotes.
 OS := $(shell uname)
-ifeq ($(OS),Windows_NT)
-	CFLAGS += -finput-charset=UTF-8 
+ifeq ($(OS),windows32)
+	CFLAGS += -finput-charset=UTF-8
 	BINARY = $(TARGET).exe
 	Q=
 	ESC="
