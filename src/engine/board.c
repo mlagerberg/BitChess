@@ -551,7 +551,7 @@ void Board_undo_move(Board *board, UndoableMove *umove) {
 void Board_save(Board *board, const char *filename) {
 	FILE *file = fopen(filename, "w");
 	if (file == NULL) {
-		fprintf(stderr, "Error opening file!");
+		fprintf(stderr, "Error opening file %s!", filename);
 		exit(1);
 	}
 	int i,j;

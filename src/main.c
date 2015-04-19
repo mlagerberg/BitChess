@@ -27,12 +27,12 @@
 const char* APP = "BitChess";
 const char* VERSION = "0.1.2";
 const char* AUTHOR = "Mathijs Lagerberg";
-char* DEFAULT_FILE = "%d.game";
-char* SLOT_FILE = "%d.game";
-char* SLOT_MOVES_FILE = "%d.moves";
-char* BACKUP_FILE = ".game.bak";
-char* DEFAULT_MOVES_FILE = ".moves";
-char* BACKUP_MOVES_FILE = ".moves.bak";
+char* DEFAULT_FILE = "game";
+char* SLOT_FILE = "%i.game";
+char* SLOT_MOVES_FILE = "%i.moves";
+char* BACKUP_FILE = "game.bak";
+char* DEFAULT_MOVES_FILE = "moves";
+char* BACKUP_MOVES_FILE = "moves.bak";
 char* YEAR = &__DATE__[7];
 
 
@@ -557,10 +557,10 @@ int get_game_slot(char *arg) {
 }
 
 void prepare_filenames() {
-	DEFAULT_FILE = with_user_dir("%d.game");
-	SLOT_FILE = with_user_dir("%d.game");
-	SLOT_MOVES_FILE = with_user_dir("%d.moves");
-	BACKUP_FILE = with_user_dir(".game.bak");
-	DEFAULT_MOVES_FILE = with_user_dir(".moves");
-	BACKUP_MOVES_FILE = with_user_dir(".moves.bak");
+	DEFAULT_FILE = with_user_dir(DEFAULT_FILE);
+	SLOT_FILE = with_user_dir(SLOT_FILE);
+	SLOT_MOVES_FILE = with_user_dir(SLOT_MOVES_FILE);
+	BACKUP_FILE = with_user_dir(BACKUP_FILE);
+	DEFAULT_MOVES_FILE = with_user_dir(DEFAULT_MOVES_FILE);
+	BACKUP_MOVES_FILE = with_user_dir(BACKUP_MOVES_FILE);
 }

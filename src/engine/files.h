@@ -12,6 +12,11 @@
 #define _FILES_H_
 
 /**
+ * Storage path of the game files, relative to the user's home folder
+ */
+#define STORAGE_DIR "/.BitChess/"
+
+/**
  * Returns true if the given file exists.
  * Show errors to the user when things go wrong
  * and show_error is enabled.
@@ -30,6 +35,7 @@ bool copy_file(const char *old_filename, const char *new_filename);
 
  /**
   * Prepends the filename with the user's home dir path
+  * and STORAGE_DIR
   */
  char* with_user_dir(char* filename);
 
