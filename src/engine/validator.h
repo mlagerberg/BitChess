@@ -24,7 +24,7 @@ bool v_is_valid_move(Board *board, Move *move);
  * of those moves in the first parameter.
  *
  * The first parameter must be allocated like so:
- * Move *head = calloc(1,sizeof(Move));
+ * Move *head = Move_alloc();
  */
 int v_get_all_valid_moves_for_color(Move **head, Board *board, int color);
 

@@ -12,6 +12,14 @@
 #define _MOVE_H_
 
 /**
+ * Creates a blank Move; doesn't initialize memory for it,
+ * only allocates.
+ * Only use then filling in ALL content of the Move yourself,
+ * otherwise use Move_create.
+ */
+Move *Move_alloc();
+
+/**
  * Creates a new Move.
  * Source field is x,y and target is xx,yy. `promotion`, if not
  * EMPTY, is the piece to promote to in case of a pawn promotion.
@@ -63,6 +71,11 @@ inline int Move_compare(Move *m1, Move *m2);
  * how to undo a move.
  */
 UndoableMove *Undo_create(int x, int y, int xx, int yy, int hit_y, Piece *piece, bool white_can_castle_queens_side, bool white_can_castle_kings_side, bool black_can_castle_queens_side, bool black_can_castle_kings_side, bool white_can_en_passant, bool black_can_en_passant);
+
+/**
+ * Cleans up an UndoableMove
+ */
+void Undo_destroy(UndoableMove* umove);
 
 /**
  * Checks if the UndoableMove is the first of a chain of moves.

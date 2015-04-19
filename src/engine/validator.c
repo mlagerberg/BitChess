@@ -70,12 +70,12 @@ static bool gives_check(Board *board, Move *move, int color) {
 	}
 	if (kingI == -1) {
 		Board_undo_move(board, umove);
-		free(umove);
+		Undo_destroy(umove);
 		return true;
 	}
 	int result = v_square_gives_check(board, kingI, kingJ, color);
 	Board_undo_move(board, umove);
-	free(umove);
+	Undo_destroy(umove);
 	return result;
 }
 
@@ -258,7 +258,7 @@ bool v_is_valid_move(Board *board, Move *move) {
 		return false;
 	}
 	// A move is valid if it can be made and does not result in check of the current player
-	Move *validmoves = calloc(1,sizeof(Move));
+	Move *validmoves = Move_alloc();
 	get_all_valid_moves_of_piece(&validmoves, board, move->x, move->y, false);
 	int is_valid = contains(validmoves, move);
 	int result = is_valid && !gives_check(board, move, Board_get_piece(board, move->x, move->y)->color);

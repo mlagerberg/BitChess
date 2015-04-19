@@ -32,10 +32,11 @@ char * Simple_move_format(Board *board, Move *m) {
 
 Move *Simple_move_parse(char *str, Board *board) {
 	// Generate all moves:
-	Move *head = calloc(1,sizeof(Move));
+	Move *head = Move_alloc();
 	int color = Board_turn(board);
 	int total = v_get_all_valid_moves_for_color(&head, board, color);
 	if (total == 0) {
+		Move_destroy(head);
 		return NULL;
 	}
 

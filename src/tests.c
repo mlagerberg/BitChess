@@ -80,7 +80,7 @@ int test_validator() {
 	};
 	for (i = PAWN; i <= KING; i++) {
 		int count;
-		Move *head = calloc(1,sizeof(Move));
+		Move *head = Move_alloc();
 		// Put a single piece back at the center
 		Board_set(b, FILE_E, RANK_4, Piece_create(i, WHITE));
 		// Get all valid moves:

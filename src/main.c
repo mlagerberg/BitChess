@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 			UndoableMove *um = Board_do_move(board, move);
 			// Check for captures
 			Board_add_capture(board, um);
-			free(um);
+			Undo_destroy(um);
 			if (verbosity > 1) {
 				// Print the result
 				Board_print(board, -Board_turn(board));
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
 				um = Board_do_move(board, counter);
 				// Check for captures for this move too
 				Board_add_capture(board, um);
-				free(um);
+				Undo_destroy(um);
 				Move_destroy(counter);
 			}
 			// Save to file
@@ -370,7 +370,7 @@ void new_game(int user_color) {
 		// Usually we'd do this after a move, but capturing a piece in the first move
 		// is probably too challenging for most players
 		//Board_add_capture(board, um);
-		free(um);
+		Undo_destroy(um);
 		Move_destroy(move);
 	}
 	save_game(board);
@@ -393,8 +393,7 @@ void restart_game() {
 		print_move(board, move);
 		save_move(board, move);
 		UndoableMove *um = Board_do_move(board, move);
-		//Board_add_capture(board, um);
-		free(um);
+		Undo_destroy(um);
 		Move_destroy(move);
 	} else {
 		printf("user plays white\n");
@@ -424,7 +423,7 @@ void swap_sides() {
 	UndoableMove *um = Board_do_move(board, move);
 	Board_add_capture(board, um);
 	save_game(board);
-	free(um);
+	Undo_destroy(um);
 	Board_destroy(board);
 	Move_destroy(move);
 }
@@ -482,7 +481,7 @@ void show_moves() {
 	}
 	Board *board = Board_read(DEFAULT_FILE);
 	// Generate all moves:
-	Move *head = calloc(1, sizeof(Move));
+	Move *head = Move_alloc();
 	int color = Board_turn(board);
 	int total = v_get_all_valid_moves_for_color(&head, board, color);
 	if (total == 0) {

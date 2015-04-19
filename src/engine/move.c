@@ -10,9 +10,12 @@
 #include "move.h"
 #include "piece.h"
 
+Move *Move_alloc() {
+	return calloc(1,sizeof(Move));
+}
+
 Move *Move_create(int color, int x, int y, int xx, int yy, int promotion) {
-	Move *m = malloc(sizeof(Move));
-	
+	Move *m = Move_alloc();
 	m->x = x; m->y = y;
 	m->xx = xx; m->yy = yy;
 	m->is_castling = false;
@@ -40,10 +43,7 @@ Move *Move_clone(Move *move) {
 }
 
 void Move_destroy(Move *m) {
-	if (m == NULL) {
-		return;
-	}
-	if (m->next_sibling != NULL) {
+	if (m != NULL && m->next_sibling != NULL) {
 		Move_destroy(m->next_sibling);
 	}
 	free(m);
@@ -119,6 +119,10 @@ UndoableMove *Undo_create(int x, int y, int xx, int yy, int hit_y, Piece *piece,
 	umove->adds_to_fifty = false;
 	umove->previous = NULL;
 	return umove;
+}
+
+void Undo_destroy(UndoableMove* umove) {
+	free(umove);
 }
 
 bool Move_is_first(UndoableMove *umove) {

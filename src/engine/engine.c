@@ -121,7 +121,7 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	// Init randomizer:
 	srand(time(NULL));
 	// Generate list of all valid moves:
-	Move *head = calloc(1,sizeof(Move));
+	Move *head = Move_alloc();
 	int total = v_get_all_valid_moves_for_color(&head, board, color);
 	// No reason to evaluate forced moves:
 	if (total == 1) {
@@ -131,7 +131,7 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 		return head;
 	}
 	// Make array and shuffle it:
-	Move **arr = calloc(1,sizeof(Move) * total);
+	Move **arr = malloc(sizeof(Move) * total);
 	create_shuffled_array(arr, head, total);
 	// Find the best move:
 	head = get_best_move(board, stats, color, ply_depth, arr, total);
@@ -219,8 +219,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 	int white = (color == WHITE);
 	int best = 0;
 	for(i = 1; i < total - 1; i++) {
-		if ((white && head[i]->fitness > head[best]->fitness)
-				|| (!white && head[i]->fitness < head[best]->fitness)) {
+		if (white == (head[i]->fitness > head[best]->fitness)) {
 			best = i;
 		}
 	}
@@ -316,7 +315,7 @@ void *evaluate_moves(void *threadarg) {
 			printf(".");
 			fflush(stdout);
 		}
-		free(umove);
+		Undo_destroy(umove);
 	}
 	return NULL;
 }
@@ -337,17 +336,15 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			if (DRAW_ALL_MOVES) {
 				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
 			}
-			// Give processor some breathing room
-			// TODO disabled because it messes up the time measurements.
-			//usleep(100);
 			return result;
 		}
 	}
 
 	bool at_check = v_king_at_check(board, color);
-	Move *moves = calloc(1,sizeof(Move));
+	Move *moves = Move_alloc();
 	v_get_all_valid_moves_for_color(&moves, board, color);
 	if (moves == NULL || Move_is_nullmove(moves)) {
+		Move_destroy(moves);
 		if (at_check) {
 			// Mate!
 			if (color == WHITE) {
@@ -398,6 +395,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		}
 		int result = ab[0];
 		Board_undo_move(board, umove);
+		Undo_destroy(umove);
 		if (DRAW_ALL_MOVES && depth > 1) {
 			print_depth(depth);
 			curr->fitness = result;
@@ -451,7 +449,6 @@ static void create_shuffled_array(Move **arr, Move *head, int total) {
 			curr = curr->next_sibling;
 		} else if (i+1 < total) {
 			fprintf(stderr, "List of moves ends at %d while length should be %d", i+1, total);
-			//total = i+1;
 			break;
 		}
 	}
@@ -462,7 +459,7 @@ static void create_shuffled_array(Move **arr, Move *head, int total) {
 
 	// Shuffle array by randomly swapping elements
 	for (i = 0; i < total; i++) {
-		// Swap move at i with move at a random position"
+		// Swap move at i with move at a random position
 		int target = rand() % total;
 		if (target != i) {
 			Move *temp = arr[i];
