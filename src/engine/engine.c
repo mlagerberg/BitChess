@@ -285,6 +285,20 @@ void *evaluate_moves(void *threadarg) {
 			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);			
 		}
 
+		// Restore the board
+		Board_undo_move(data->board, umove);
+		if (DRAW_THINKING) {
+			if ((white && data->head[i]->fitness > best_fitness) || (!white && data->head[i]->fitness < best_fitness)) {
+				best_fitness = data->head[i]->fitness;
+				printf("  Considering ");
+				Move_print(data->head[i]);
+			}
+		} else if (!DRAW_ALL_MOVES && draw_progress) {
+			printf(".");
+			fflush(stdout);
+		}
+		Undo_destroy(umove);
+
 		// Check for alpha/beta cut-offs
 		data->head[i]->fitness = result;
 		if (white) {
@@ -302,20 +316,6 @@ void *evaluate_moves(void *threadarg) {
 				break;
 			}
 		}
-
-		// And restore the board
-		Board_undo_move(data->board, umove);
-		if (DRAW_THINKING) {
-			if ((white && data->head[i]->fitness > best_fitness) || (!white && data->head[i]->fitness < best_fitness)) {
-				best_fitness = data->head[i]->fitness;
-				printf("  Considering ");
-				Move_print(data->head[i]);
-			}
-		} else if (!DRAW_ALL_MOVES && draw_progress) {
-			printf(".");
-			fflush(stdout);
-		}
-		Undo_destroy(umove);
 	}
 	return NULL;
 }
