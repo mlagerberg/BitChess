@@ -17,7 +17,7 @@
 static int read_two_chars(FILE *file, char *buf);
 
 Board *Board_create() {
-	Board *b = malloc(sizeof(Board));
+	Board *b = calloc(1, sizeof(Board));
 	Board_reset(b);
 	return b;
 }
@@ -605,8 +605,7 @@ static int read_two_chars(FILE *file, char *buf) {
 Board *Board_read(const char *filename) {
 	FILE *file;
 	char *buf = malloc(2 * sizeof(char));
-	Board *board = malloc(sizeof(Board));
-	Board_reset(board);
+	Board *board = Board_create();
 
 	file = fopen(filename, "r");
 	if (file) {

@@ -43,8 +43,6 @@ Piece *Piece_clone(Piece *src) {
 }
 
 Piece *Piece_parse(char *symbol) {
-	//Piece *p = malloc(sizeof(Piece));
-	//p->symbol = strdup(symbol);
 	int color;
 	if (symbol[0] == 'b') {
 		color = BLACK;

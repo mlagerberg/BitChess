@@ -55,7 +55,7 @@
 	#define MAX_PLY_DEPTH (3)
 	#define MAX_EXTRA_PLY_DEPTH (1)
 	#define DRAW_MOVES (false)
-	#define DRAW_ALL_MOVES (true)
+	#define DRAW_ALL_MOVES (false)
  	#undef THREADS 	/// Disable multithreading
 #endif
 
