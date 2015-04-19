@@ -37,7 +37,7 @@ def chess_command(engine, command):
 
 def do_move(engine):
     out = chess_command(engine, "switch")
-    if "finished" in out:
+    if "#" in out:
         print "Game has finished"
         return True
     else:

@@ -313,6 +313,15 @@ void Board_print(Board *b, int player) {
 	} else {
 		printf("    H   G   F   E   D   C   B   A\n");
 	}
+	if (b->state == WHITE_WINS) {
+		printf("Game over: white won.");
+	} else if (b->state == BLACK_WINS) {
+		printf("Game over: black won.");
+	} else if (b->state == STALE_MATE) {
+		printf("Game over: stale mate.");
+	} else if (b->state == DRAW) {
+		printf("Game over: draw.");
+	}
 }
 #endif
 
@@ -423,6 +432,9 @@ UndoableMove *Board_do_move(Board *board, Move *move) {
 				, board->black_can_en_passant);
 	board->black_can_en_passant = -1;
 	board->white_can_en_passant = -1;
+	if (move->gives_check_mate) {
+		board->state = (Board_turn(board) == WHITE ? WHITE_WINS : BLACK_WINS);
+	}
 
 	if (target == NULL && piece->shape != PAWN) {
 		board->fifty_move_count++;
