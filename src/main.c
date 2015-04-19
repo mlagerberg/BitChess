@@ -25,7 +25,7 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.2";
+const char* VERSION = "0.1.3";
 const char* AUTHOR = "Mathijs Lagerberg";
 char* DEFAULT_FILE = "game";
 char* SLOT_FILE = "%i.game";
@@ -445,12 +445,12 @@ int evaluate() {
 		exit(1);
 	}
 	Board *board = Board_read(DEFAULT_FILE);
-	Stats stats = {0, 0, 0};
 	// Using OPENING_BOOK_MAX_PLY_DEPTH for the search depth here,
 	// because this method is meant to be used for generating
 	// opening books.
-	Move *move = Engine_turn(board, &stats, Board_turn(board), OPENING_BOOK_MAX_PLY_DEPTH, 0);
-	Move_destroy(move);
+	//Stats stats = {0, 0, 0};
+	//Move *move = Engine_turn(board, &stats, Board_turn(board), OPENING_BOOK_MAX_PLY_DEPTH, 0);
+	//Move_destroy(move);
 	int value = Board_evaluate(board);
 	printf("%d\n",value);
 	Board_destroy(board);
