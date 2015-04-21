@@ -9,7 +9,6 @@
 #include <windows.h>	// _mkdir
 #else
 #include <sys/stat.h>	// mkdir
-#include <sys/types.h>	// S_IRWXO
 #endif
 
 // Holder for the user dir
@@ -98,7 +97,7 @@ char* user_dir() {
 			strcpy(HOME_DIR, temp);
 		}
 		strcat(HOME_DIR, STORAGE_DIR);
-		mkdir(HOME_DIR, S_IRWXO);
+		mkdir(HOME_DIR, 0755);
 	}
 	return HOME_DIR;
 }
