@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 #####################################################
 #
 # This script plays to instances of the chess
@@ -13,9 +13,15 @@
 
 import subprocess
 import time
+import platform
 
-NEW_ENGINE = './chess.exe'
-OLD_ENGINE = './chess.0.1.2.exe'
+if platform.system() == 'Windows':
+    NEW_ENGINE = './chess.exe'
+    OLD_ENGINE = './chess.0.1.2.exe'
+else:
+    NEW_ENGINE = './chess'
+    OLD_ENGINE = './chess'
+
 MAX_MOVES = 10
 MAX_GAMES = 10
 OLD = False
@@ -117,8 +123,8 @@ def test():
         startEngine = NEW if i % 2 == 0 else OLD
         try:
             clockNew, clockOld, score = loop(startEngine)
-        except:
-            print "Process stopped with error!"
+        except Exception as e:
+            print e.message
             break
         totalClockNew = totalClockNew + clockNew
         totalClockOld = totalClockOld + clockOld
