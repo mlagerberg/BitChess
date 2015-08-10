@@ -25,7 +25,7 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.3";
+const char* VERSION = "0.1.4";
 const char* AUTHOR = "Mathijs Lagerberg";
 char* DEFAULT_FILE = "game";
 char* SLOT_FILE = "%i.game";
@@ -44,7 +44,7 @@ static int verbosity = 2;
 static int no_counter = 0;
 /// Using the -m command, this toggles between shorthand (algebraic)
 /// and simple move notation.
-static bool algebraic = true;	
+static bool algebraic = true;
 
 
 // Prepares the Windows Command Prompt to show unicode characters
@@ -543,16 +543,18 @@ int restore_from_slot(int slot) {
 }
 
 int get_game_slot(char *arg) {
-	char *p;
-	long slot = strtol(arg, &p, 0);
-	if (errno || arg == p) {
+	char const * endptr;
+	int slot = strtol(arg, &endptr, 0);
+	if (endptr == arg) {
 		fprintf(stderr, "Unable to parse game slot number %s.\n", arg);
-		return 1;
-	} else if (slot > 9 || slot < 0) {
-		fprintf(stderr, "Game slot not available; only values in the range 0-9 are allowed.\n");
-		return 1;
+		return -1;
+	} else {
+		if (slot > 9 || slot < 0) {
+			fprintf(stderr, "Game slot not available; only values in the range 0-9 are allowed.\n");
+			return -1;
+		}
+		return slot;
 	}
-	return slot;
 }
 
 void prepare_filenames() {
