@@ -280,8 +280,7 @@ void usage() {
 	printf("              'e8=Q'. Castling can be performed by 'O-O' or 'O-O-O' (i.e.\n");
 	printf("              capital 'oh', not zeros).\n");
 	printf("  new         Starts a new game, where a virtual coin toss determines who plays\n");
-	printf("              white. The game is stored in a file called .game in the current\n");
-	printf("              directory.\n");
+	printf("              white. The game files are stored in ~/.BitChess/.\n");
 	printf("  print       Shows the current board position.\n");
 	printf("  reset       Restarts an ongoing game.\n");
 	printf("  switch      Switches sides in an ongoing game. The computer player will make\n");
