@@ -2,11 +2,11 @@ BitChess
 ===========================
 
 
-BitChess is a (very simple) CLI chess engine written in C.
+BitChess is a (very simple) command-line chess engine written in C.
 
 It is pretty much feature-complete (I think), relatively smart, and not all too slow. It's name is inspired by all the software that starts with 'bit' nowadays (Bitcoin, Bitbucket, Bit.ly, BIT.TRIP RUNNER) and should be pronounced as 'bitches'. Players of the game are to be referred to as '*playa's*'.
 
-[![Build Status](https://travis-ci.org/monkeyinmysoup/BitChess.svg?branch=master)](https://travis-ci.org/monkeyinmysoup/BitChess)
+[![Build Status](https://travis-ci.org/mlagerberg/BitChess.svg?branch=master)](https://travis-ci.org/mlagerberg/BitChess)
 
 ## Screenshots
 
@@ -31,8 +31,7 @@ You can run the chess engine through the command line, like so:
 					  Castling can be performed by 'O-O' or 'O-O-O' (capital 'oh', not
 					  zeros).
 		 new          Starts a new game, where a virtual coin toss determines who plays 
-					  white. The game is stored in a file called .game in the current
-					  directory.
+					  white. The game files are stored in ~/.Bitchess/
 		 print        Shows the current board position.
 		 reset        Restarts an ongoing game.
 		 switch       Switches sides in an ongoing game. The computer player will make a
@@ -67,10 +66,9 @@ For performance, I'd really like to see the following added as well:
 - improve and add unit tests.
 
 
-
 ## Building
 
-Simply run `make` to build on Linux, OS X or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+Simply run `make` to build on Linux, OS X or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading. Run `make test` to build an run some very basic unit tests. `make debug` for creating a verbose debug build.
 
 [1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/, on Mac: install XCode.
 
