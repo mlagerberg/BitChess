@@ -4,6 +4,6 @@ os:
   - linux
 
 compiler:
-  - gcc
+  - gcc-5
 
 script: make test
