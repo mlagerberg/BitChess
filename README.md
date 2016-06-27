@@ -10,7 +10,7 @@ It is pretty much feature-complete (I think), relatively smart, and not all too 
 
 ## Screenshots
 
-Starting a new game ang making a first move:
+Starting a new game and making a first move:
 
 ![Starting a game. Virtual coin toss decides who plays white.](http://i.imgur.com/7mLKXNN.gif)
 
@@ -68,7 +68,19 @@ For performance, I'd really like to see the following added as well:
 
 ## Building
 
-Simply run `make` to build on Linux, OS X or Windows (assuming you have the gcc build tools installed[1]). Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading. Run `make test` to build an run some very basic unit tests. `make debug` for creating a verbose debug build.
+Assuming you have the gcc build tools installed[1]. Note that that the Windows version isn't tested as often as the Linux version, and doesn't support multi-threading.
+
+To build on Linux, OS X or Windows, simply run:
+
+	make
+
+To build a verbose debug version and run some very basic unit tests:
+
+	make debug test
+
+To build and install to `/usr/local/bin`:
+
+	make install
 
 [1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/, on Mac: install XCode.
 
@@ -78,7 +90,6 @@ Simply run `make` to build on Linux, OS X or Windows (assuming you have the gcc 
 I'm aware that there are plenty of open source chess engines available that are much, much better than I'll ever be able to create. However, creating my own chess engine is something I've been wanting to do for a long time.
 
 This project is solely meant as a hobby project for myself, and might therefore contain some questionable design choices that would not have been made if it was targeted towards the general public. This does not mean that I'm the only one to ever find use for this project, though I'm willing to take that risk.
-
 
 
 ## Licenses
