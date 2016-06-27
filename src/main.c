@@ -542,7 +542,7 @@ int restore_from_slot(int slot) {
 }
 
 int get_game_slot(char *arg) {
-	char const * endptr;
+	char * endptr;
 	int slot = strtol(arg, &endptr, 0);
 	if (endptr == arg) {
 		fprintf(stderr, "Unable to parse game slot number %s.\n", arg);

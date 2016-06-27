@@ -49,18 +49,11 @@ void Move_destroy(Move *m) {
 	free(m);
 }
 
-bool Move_is_nullmove(Move *m) {
-	return (m == NULL)
-		|| (m->x == 0 && m->y == 0 && m->xx == 0 && m->yy == 0);
-}
+extern inline bool Move_is_nullmove(Move *m);
 
-bool Move_equals(Move *m1, Move *m2) {
-	return m1->x == m2->x && m1->y == m2->y && m1->xx == m2->xx && m1->yy == m2->yy;
-}
+extern inline bool Move_equals(Move *m1, Move *m2);
 
-int Move_compare(Move *m1, Move *m2) {
-	return m1->fitness - m2->fitness;
-}
+extern inline int Move_compare(Move *m1, Move *m2);
 
 unsigned int Move_get_as_int(Move *m) {
 	unsigned int r = 0;
@@ -125,10 +118,6 @@ void Undo_destroy(UndoableMove* umove) {
 	free(umove);
 }
 
-bool Move_is_first(UndoableMove *umove) {
-	return umove->previous == NULL;
-}
+extern inline bool Move_is_first(UndoableMove *umove);
 
-int Move_quiescence(UndoableMove *umove, Board *board) {
-	return umove->hit_piece == NULL ? 0 : QUIESCENCE_PENALTY_CAPTURE;
-}
+extern inline int Move_quiescence(UndoableMove *umove, Board *board);

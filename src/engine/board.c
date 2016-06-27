@@ -325,44 +325,21 @@ void Board_print(Board *b, int player) {
 }
 #endif
 
-Piece *Board_get_piece(Board *b, int x, int y) {
-	return b->fields[x][y];
-}
+extern inline Piece *Board_get_piece(Board *b, int x, int y);
 
-Piece *Board_get_piece_safe(Board *b, int x, int y) {
-	if (x < 0 || x > 7 || y < 0 || y > 7) {
-		return NULL;
-	}
-	return b->fields[x][y];
-}
+extern inline Piece *Board_get_piece_safe(Board *b, int x, int y);
 
-bool Board_is_empty(Board *b, int x, int y) {
-	return b->fields[x][y] == NULL;
-}
+extern inline bool Board_is_empty(Board *b, int x, int y);
 
-bool Board_is_at(Board *b, int x, int y, int shape, int color) {
-	Piece *p = Board_get_piece(b, x, y);
-	return p != NULL && Piece_matches(p, shape, color);
-}
+extern inline bool Board_is_at(Board *b, int x, int y, int shape, int color);
 
-bool Board_is_at_safe(Board *b, int x, int y, int shape, int color) {
-	Piece *p = Board_get_piece_safe(b, x, y);
-	return p != NULL && Piece_matches(p, shape, color);
-}
+extern inline bool Board_is_at_safe(Board *b, int x, int y, int shape, int color);
 
-bool Board_is_color(Board *b, int x, int y, int color) {
-	Piece *p = Board_get_piece(b, x, y);
-	return p != NULL && p->color == color;
-}
+extern inline bool Board_is_color(Board *b, int x, int y, int color);
 
-bool Board_is_type(Board *b, int x, int y, int shape) {
-	Piece *p = Board_get_piece(b, x, y);
-	return p != NULL && p->shape == shape;
-}
+extern inline bool Board_is_type(Board *b, int x, int y, int shape);
 
-void Board_set(Board *b, int x, int y, Piece *p) {
-	b->fields[x][y] = p;
-}
+extern inline void Board_set(Board *b, int x, int y, Piece *p);
 
 void Board_remove_piece(Board *b, int x, int y) {
 	if (b->fields[x][y] == NULL)
@@ -371,13 +348,9 @@ void Board_remove_piece(Board *b, int x, int y) {
 	b->fields[x][y] = NULL;
 }
 
-int Board_evaluate(Board *b) {
-	return Fitness_calculate(b);
-}
+extern inline int Board_evaluate(Board *b);
 
-int Board_turn(Board *b) {
-	return b->ply_count % 2 == 0 ? WHITE : BLACK;
-}
+extern inline int Board_turn(Board *b);
 
 bool Board_equals(bool quick, Board *left, Board *right) {
 	int ok = quick ||

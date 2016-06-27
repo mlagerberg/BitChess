@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include "common.h"
 #include "datatypes.h"
+#include "fitness.h"
+#include "piece.h"
 
 /**
  * board.h / board.c
@@ -67,7 +69,9 @@ void Board_print_captures(Board *b, int color);
 * Both x and y must lie within the interval [0,7].
 * If the parameters can be outside this range, use getPieceSafe() instead. 
 */
-inline Piece *Board_get_piece(Board *b, int x, int y);
+inline Piece *Board_get_piece(Board *b, int x, int y) {
+	return b->fields[x][y];
+}
 
 /**
 * Equal to getPiece, but with the difference that this
@@ -76,18 +80,27 @@ inline Piece *Board_get_piece(Board *b, int x, int y);
 * If it is priorly known that the specified square is on the board,
 * use getPiece instead for performance.
 */
-inline Piece *Board_get_piece_safe(Board *b, int x, int y);
+inline Piece *Board_get_piece_safe(Board *b, int x, int y) {
+	if (x < 0 || x > 7 || y < 0 || y > 7) {
+		return NULL;
+	}
+	return b->fields[x][y];
+}
 
 /**
 * Returns true if there's no piece on square pos=(x,y).
 * Both x and y must lie within the interval [0,7].
 */
-inline bool Board_is_empty(Board *b, int x, int y);
+inline bool Board_is_empty(Board *b, int x, int y) {
+	return b->fields[x][y] == NULL;
+}
 
 /**
  * Returns the value assigned to this board position
  */
-inline int Board_evaluate(Board *b);
+inline int Board_evaluate(Board *b) {
+	return Fitness_calculate(b);
+}
 
 /**
 * Checks if the given tile contains the given color and type.
@@ -95,28 +108,40 @@ inline int Board_evaluate(Board *b);
 * Does NOT check if the tile is within the boundaries of the board.
 * Use is_at_safe for that.
 */
-inline bool Board_is_at(Board *b, int x, int y, int shape, int color);
+inline bool Board_is_at(Board *b, int x, int y, int shape, int color) {
+	Piece *p = Board_get_piece(b, x, y);
+	return p != NULL && Piece_matches(p, shape, color);
+}
 
 /**
 * Checks if the given tile contains the given color and type.
 * Usefull to skip having to check if the position is within
 * the boundaries of the board and if the tile is empty
 */
-inline bool Board_is_at_safe(Board *b, int x, int y, int shape, int color);
+inline bool Board_is_at_safe(Board *b, int x, int y, int shape, int color) {
+	Piece *p = Board_get_piece_safe(b, x, y);
+	return p != NULL && Piece_matches(p, shape, color);
+}
 
 /**
 * Checks if the given tile contains the given color.
 * Usefull to skip having to check if the tile is empty.
 * Does NOT check if the tile is within the boundaries of the board!
 */
-inline bool Board_is_color(Board *b, int x, int y, int color);
+inline bool Board_is_color(Board *b, int x, int y, int color) {
+	Piece *p = Board_get_piece(b, x, y);
+	return p != NULL && p->color == color;
+}
 
 /**
 * Checks if the given tile contains the given piece type.
 * Usefull to skip having to check if the tile is empty.
 * Does NOT check if the tile is within the boundaries of the board!
 */
-inline bool Board_is_type(Board *b, int x, int y, int shape);
+inline bool Board_is_type(Board *b, int x, int y, int shape) {
+	Piece *p = Board_get_piece(b, x, y);
+	return p != NULL && p->shape == shape;
+}
 
 /**
 * Puts the given piece on position pos=(i,j) on the board.
@@ -129,12 +154,16 @@ inline bool Board_is_type(Board *b, int x, int y, int shape);
 *
 * - What to do with the occupied field if ! null? Free memory? Clone result?
 */
-inline void Board_set(Board *b, int x, int y, Piece *p);
+inline void Board_set(Board *b, int x, int y, Piece *p) {
+	b->fields[x][y] = p;
+}
 
 /**
  * WHITE or BLACK
  */
-inline int Board_turn(Board *b);
+inline int Board_turn(Board *b) {
+	return b->ply_count % 2 == 0 ? WHITE : BLACK;
+}
 
 /**
 * Tests if the board equals another board. Note that this method is designed to

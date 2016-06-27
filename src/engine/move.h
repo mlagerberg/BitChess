@@ -40,9 +40,14 @@ void Move_destroy(Move *m);
  * Returns true for moves that are empty dummymoves,
  * that are used as the start of a linked list of moves.
  */
-inline bool Move_is_nullmove(Move *m);
+inline bool Move_is_nullmove(Move *m) {
+	return (m == NULL)
+		|| (m->x == 0 && m->y == 0 && m->xx == 0 && m->yy == 0);
+}
 
-inline bool Move_equals(Move *m1, Move *m2);
+inline bool Move_equals(Move *m1, Move *m2) {
+	return m1->x == m2->x && m1->y == m2->y && m1->xx == m2->xx && m1->yy == m2->yy;
+}
 
 unsigned int Move_get_as_int(Move *m);
 
@@ -64,7 +69,9 @@ void Move_print_all(Move *head);
 * When sorting, this'll sort in order of ascending move value.
 * For white this puts the worst move first, for black the best move
 */
-inline int Move_compare(Move *m1, Move *m2);
+inline int Move_compare(Move *m1, Move *m2) {
+	return m1->fitness - m2->fitness;
+}
 
 /**
  * Constructor for UndoableMoves, i.e. structs that contain instructions on
@@ -82,8 +89,12 @@ void Undo_destroy(UndoableMove* umove);
  * Since the UndoableMoves are basically on a stack (FILO), this
  * technically means the UndoableMove is the last and the Move is the first.
  */
-inline bool Move_is_first(UndoableMove *umove);
+inline bool Move_is_first(UndoableMove *umove) {
+	return umove->previous == NULL;
+}
 	
-inline int Move_quiescence(UndoableMove *umove, Board *board);
+inline int Move_quiescence(UndoableMove *umove, Board *board) {
+	return umove->hit_piece == NULL ? 0 : QUIESCENCE_PENALTY_CAPTURE;
+}
 
 #endif

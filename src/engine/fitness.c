@@ -9,8 +9,8 @@
 #include "validator.h"
 #include "fitness.h"
 
-/// To add a random value to the final evaluation result.
-const static int RANDOM_FACTOR = 0;
+// To add a random value to the final evaluation result.
+//#define RANDOM_FACTOR 10
 
 // Several penalty or reward values
 const static int DOUBLE_PAWN_PENALTY = -20;			/// Two pawns of player in the same file
@@ -40,24 +40,11 @@ const static int KNIGHT_CENTER_BONUS[7] = {30,25,20,15,10,5,0};
 const static int KING_CENTER_BONUS[8] = {36,24,16,8,0,-8,-16,-24};
 
 
-int max(int a, int b) {
-	return a > b ? a : b;
-}
+extern inline int max(int a, int b);
 
-int min(int a, int b) {
-	return a < b ? a : b;
-}
+extern inline int min(int a, int b);
 
-int get_pawn_count(int cache_pawn_count[2][8], int file, int color) {
-	if (file < 0 || file > 7) {
-		return 0;
-	}
-	if (color == BLACK) {
-		return cache_pawn_count[0][file];
-	} else {
-		return cache_pawn_count[1][file];
-	}
-}
+extern inline int get_pawn_count(int cache_pawn_count[2][8], int file, int color);
 
 
 int Fitness_calculate(Board *board) {
@@ -251,8 +238,8 @@ int Fitness_calculate(Board *board) {
 			}
 		}
 	}
-	if (RANDOM_FACTOR > 0) {
+	#ifdef RANDOM_FACTOR
 		result += (rand() % RANDOM_FACTOR);
-	}
+	#endif
 	return result;
 }
