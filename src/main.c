@@ -513,12 +513,12 @@ int backup_to_slot(int slot) {
 		return 1;
 	}
 	Board *board = Board_read(DEFAULT_FILE);
-	char *file = malloc(7 * sizeof(char));
+	char *file = malloc((strlen(SLOT_FILE) + 1) * sizeof(char));
 	sprintf(file, SLOT_FILE, slot);
 	Board_save(board, file);
 	Board_destroy(board);
 
-	char *file2 = malloc(8 * sizeof(char));
+	char *file2 = malloc((strlen(SLOT_MOVES_FILE) + 1) * sizeof(char));
 	sprintf(file2, SLOT_MOVES_FILE, slot);
 	copy_file(DEFAULT_MOVES_FILE, file2);
 	return 0;
@@ -528,14 +528,14 @@ int restore_from_slot(int slot) {
 	if (slot == -1) {
 		return 1;
 	}
-	char *file = malloc(7 * sizeof(char));
+	char *file = malloc((strlen(SLOT_FILE) + 1) * sizeof(char));
 	sprintf(file, SLOT_FILE, slot);
 	Board *board = Board_read(file);
 	Board_save(board, DEFAULT_FILE);
 	Board_print(board, Board_turn(board));
 	Board_destroy(board);
 
-	char *file2 = malloc(8 * sizeof(char));
+	char *file2 = malloc((strlen(SLOT_MOVES_FILE) + 1) * sizeof(char));
 	sprintf(file2, SLOT_MOVES_FILE, slot);
 	copy_file(file2, DEFAULT_MOVES_FILE);
 	return 0;
