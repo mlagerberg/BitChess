@@ -68,3 +68,5 @@ debug: executable
 test: executable
 	./$(TARGET) test
 
+install:
+	cp ./$(TARGET) /usr/local/bin
