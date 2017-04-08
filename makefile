@@ -1,9 +1,10 @@
 
 #
-# `make debug`	enables #define DEBUG in code, resulting in
-#				smaller search tree and more verbose logging.
-# `make test`	builds the app and runs it's tests.
-# `make clean`	removes executable file and src/gitversion.c.
+# `make debug`    enables #define DEBUG in code, resulting in
+#                 smaller search tree and more verbose logging.
+# `make test`	  builds the app and runs it's tests.
+# `make clean`	  removes executable file and src/gitversion.c.
+# `make install`  installs the executable into /usr/local/bin
 #
 
 # C compiler
@@ -16,12 +17,12 @@ SOURCE = src/debug.c src/main.c src/tests.c src/gitversion.c src/engine/algebrai
 TARGET = chess
 
 # compiler flags:
-#	-On							optimization level
-#	-lpthread					enables multithreading
-#	-finput-charset=UTF-8		enabled UTF-8 support (on Linux and Windows)
-#	-std=c99 -pedantic -ansi	sets a 'clean' C99 mode
-#	-Wall						shows all warnings
-CFLAGS =  -Wall -O3
+#	-On                        optimization level
+#	-lpthread                  enables multithreading
+#	-finput-charset=UTF-8      enabled UTF-8 support (on Linux and Windows)
+#	-std=c99 -pedantic -ansi   sets a 'clean' C99 mode
+#	-Wall                      shows all warnings
+CFLAGS =  -Wall -O3 -std=gnu99
 
 # Platform specific quirks:
 # - Unix gets multithreading, Windows doesn't.
