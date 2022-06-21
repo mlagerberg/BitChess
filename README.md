@@ -82,7 +82,7 @@ To build and install to `/usr/local/bin`:
 
 	make install
 
-[1]: On Linux: `sudo apt-get install gcc`, on Windows: http://www.mingw.org/, on Mac: install XCode.
+[1]: On Linux: `sudo apt-get install gcc make`, on Windows: http://www.mingw.org/, on Mac: install XCode.
 
 
 ## Why this project?

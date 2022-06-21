@@ -13,7 +13,7 @@
 char * Simple_move_format(Board *board, Move *m) {
 	char *move;
 	if (m->promotion == 0) {
-		move = malloc(6 * sizeof(char));
+		move = malloc(13 * sizeof(char));
 		sprintf(move, "%c%d-%c%d", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy);
 	} else {
 		char prom;
@@ -24,7 +24,7 @@ char * Simple_move_format(Board *board, Move *m) {
 		default:
 		case QUEEN:		prom = 'Q';	break;
 		}
-		move = malloc(7 * sizeof(char));
+		move = malloc(13 * sizeof(char));
 		sprintf(move, "%c%d-%c%d%c", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy, prom);
 	}
 	return move;
