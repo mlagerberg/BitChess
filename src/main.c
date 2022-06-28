@@ -99,9 +99,20 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	} else if (strcmp("-x", argv[1]) == 0) {
-		// Performs the move without having the AI player do a counter move.
+		// Performs the move without having the AI player do a counter move.		
+		index = 2;
+		no_counter = 1;
+		algebraic = false;
+		if (argc != 3) {
+			usage();
+			return 1;
+		}
+	} else if (strcmp("-mx", argv[1]) == 0 || strcmp("-xm", argv[1]) == 0) {
+		// -m and -x combined
+		verbosity = 0;
 		no_counter = 1;
 		index = 2;
+		algebraic = false;
 		if (argc != 3) {
 			usage();
 			return 1;
