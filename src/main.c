@@ -25,7 +25,7 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.4";
+const char* VERSION = "0.1.5";
 const char* AUTHOR = "Mathijs Lagerberg";
 char* DEFAULT_FILE = "game";
 char* SLOT_FILE = "%i.game";
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	// Fix output codepage for windows:
 	#ifdef UNICODE_FIX
-	fix_unicode(); 
+	fix_unicode();
 	#endif
 	// Prepare filenames:
 	prepare_filenames();
@@ -99,10 +99,9 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	} else if (strcmp("-x", argv[1]) == 0) {
-		// Performs the move without having the AI player do a counter move.		
+		// Performs the move without having the AI player do a counter move.
 		index = 2;
 		no_counter = 1;
-		algebraic = false;
 		if (argc != 3) {
 			usage();
 			return 1;
