@@ -22,6 +22,7 @@
 *.x86_64
 *.hex
 chess
+chess.exe
 src/gitversion.c
 
 # Game files
@@ -34,3 +35,4 @@ src/gitversion.c
 notes.txt
 test.chess
 .DS_Store
+*.swp
