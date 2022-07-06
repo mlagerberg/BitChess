@@ -25,7 +25,7 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.5";
+const char* VERSION = "0.1.6";
 const char* AUTHOR = "Mathijs Lagerberg";
 char* DEFAULT_FILE = "game";
 char* SLOT_FILE = "%i.game";
@@ -142,41 +142,41 @@ int main(int argc, char *argv[]) {
 		// Start new game, randomizing the sides
 		new_game(0);
 		if (verbosity > 1) {
-			show_board();
+			show_board(false);
 		}
 	} else if (strcmp("white", argv[index]) == 0) {
 		// Hidden option to start a new game and influence faith or rig the coin toss 
 		new_game(WHITE);
 		if (verbosity > 1) {
-			show_board();
+			show_board(false);
 		}
 	} else if (strcmp("black", argv[index]) == 0) {
 		// Hidden option to start a new game and influence faith or rig the coin toss 
 		new_game(BLACK);
 		if (verbosity > 1) {
-			show_board();
+			show_board(false);
 		}
 	} else if (strcmp("-r", argv[index]) == 0 || strcmp("restart", argv[index]) == 0 || strcmp("reset", argv[index]) == 0) {
 		// Restart the current game from the start, keep sides.
 		restart_game();
 		if (verbosity > 1) {
-			show_board();
+			show_board(false);
 		}
 	} else if (strcmp("switch", argv[index]) == 0 || strcmp("swap", argv[index]) == 0) {
 		// Switch places in current game.
 		swap_sides();
 		if (verbosity > 1) {
-			show_board();
+			show_board(false);
 		}
 	} else if (strcmp("-p", argv[index]) == 0 || strcmp("print", argv[index]) == 0) {
 		// Print the current board.
-		show_board();
+		show_board(!algebraic);
 	} else if (strcmp("-e", argv[index]) == 0 || strcmp("evaluate", argv[index]) == 0) {
 		// Print board position value.
 		evaluate();
 	} else if (strcmp("list", argv[index]) == 0) {
 		// Print a list of available moves:
-		show_moves();
+		show_moves(false);
 	} else if (strcmp("backup", argv[index]) == 0) {
 		// Backup the current game to one of nine savegame slots.
 		if (index + 1 >= argc) {
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
 			Board_destroy(board);
 			Move_destroy(move);
 			if (verbosity > 1 && !(move->gives_check_mate)) {
-				show_board();
+				show_board(false);
 			}
 		}
 	}
@@ -437,13 +437,26 @@ void swap_sides() {
 	Move_destroy(move);
 }
 
-void show_board() {
+void show_board(int simple) {
 	if (!has_game(false)) {
 		exit(1);
 	}
-	Board *board = Board_read(DEFAULT_FILE);
-	Board_print(board, Board_turn(board));
-	Board_destroy(board);
+	if (simple) {
+		// Simple output the plain file as is
+		FILE *file = fopen(DEFAULT_FILE, "r");
+		if (file) {
+			char c = fgetc(file);
+		    while (c != EOF) {
+		        printf ("%c", c);
+		        c = fgetc(file);
+		    }
+		}
+	} else {
+		// Parse the file and prettyprint the board
+		Board *board = Board_read(DEFAULT_FILE);
+		Board_print(board, Board_turn(board));
+		Board_destroy(board);
+	}
 }
 
 // Evaluates the current board position, e.g. for generating

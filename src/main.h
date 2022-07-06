@@ -51,7 +51,7 @@ void swap_sides();
 /**
  * Prints the current board.
  */
-void show_board();
+void show_board(int simple);
 /**
  * Evaluates the current board for WHITE or BLACK
  * (depending on who's turn it is).
