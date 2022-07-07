@@ -363,7 +363,7 @@ void new_game(int user_color) {
 	if (user_color == 0) {
 		human = (rand() % 100 > 50 ? WHITE : BLACK);
 	}
-	
+
 	if (human == WHITE) {
 		// User starts. Tell him.
 		printf("user plays white\n");
@@ -445,11 +445,12 @@ void show_board(int simple) {
 		// Simple output the plain file as is
 		FILE *file = fopen(DEFAULT_FILE, "r");
 		if (file) {
-			char c = fgetc(file);
-		    while (c != EOF) {
-		        printf ("%c", c);
-		        c = fgetc(file);
-		    }
+			int c = fgetc(file);
+			while (c != EOF) {
+				printf ("%c", (char) c);
+				c = fgetc(file);
+			}
+			fclose(file);
 		}
 	} else {
 		// Parse the file and prettyprint the board
