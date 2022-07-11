@@ -484,7 +484,7 @@ char * print_move(Board *board, Move *move) {
 	if (algebraic) {
 		str = AN_format(board, move, true, true);
 	} else {
-		str = Simple_move_format(board, move);
+		str = Simple_move_format(board, move, true);
 	}
 	printf("%s\n", str);
 	return str;
@@ -519,7 +519,7 @@ void show_moves() {
 			move = AN_format(board, curr, false, false);
 			printf("%d. %s\n", i, move);
 		} else {
-			move = Simple_move_format(board, curr);
+			move = Simple_move_format(board, curr, true);
 			printf("%s\n", move);
 		}
 		free(move);

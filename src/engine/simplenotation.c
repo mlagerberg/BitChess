@@ -10,9 +10,9 @@
 #include "validator.h"
 
 
-char * Simple_move_format(Board *board, Move *m) {
+char * Simple_move_format(Board *board, Move *m, int include_promotion) {
 	char *move;
-	if (m->promotion == 0) {
+	if (m->promotion == 0 || !include_promotion) {
 		move = malloc(13 * sizeof(char));
 		sprintf(move, "%c%d-%c%d", m->x + 'a', 8 - m->y, m->xx + 'a', 8 - m->yy);
 	} else {
@@ -43,7 +43,7 @@ Move *Simple_move_parse(char *str, Board *board) {
 	int any = false;
 	Move *curr = head;
 	while (curr) {
-		char *move = Simple_move_format(board, curr);
+		char *move = Simple_move_format(board, curr, false);
 		if (strcmp(str, move) == 0) {
 			any = true;
 			free(move);

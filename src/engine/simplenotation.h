@@ -20,16 +20,18 @@
 
 /**
  * Returns the simplified notation of the given move.
+ * Not including the promotion indicator helps the parser but is otherwise
+ * not recommended.
  */
-char * Simple_move_format(Board *board, Move *m);
+char * Simple_move_format(Board *board, Move *m, int include_promotion);
 
 
 /**
 * Parses an string representation of a move into an actual move. Note that
 * shorthand notations are not accepted and neither are symbols like +,!
 * To castle, enter O-O or O-O-O (with capital 'Oh').
-* Pawns are automatically promoted to a Queen, unless a capital 'N'
-* is appended to the move. This method DOES NOT check if a move is valid,
+* Pawns are automatically promoted to a Queen.
+* This method DOES NOT check if a move is valid,
 * only that the pieces are still on the board.
 */
 Move * Simple_move_parse(char *str, Board *board);
