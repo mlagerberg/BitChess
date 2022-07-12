@@ -25,8 +25,9 @@
 /*******************************************************************************************
  * Multithreading
  */
-/// To disable threading it's better to disable #define THREADS
-/// than to set the thread count to 0, to remove multithreading overhead.
+
+// To disable threading it's better to disable #define THREADS
+// than to set the thread count to 0, to remove multithreading overhead.
 #define MAX_THREADS (4)
 
 /*******************************************************************************************
@@ -37,26 +38,31 @@
 // with -DDEBUG (when using gcc, at least)
 // or building with `make debug`
 #ifndef DEBUG
-	/// Minimum ply depth. Except for the standard alpha/beta behaviour,
-	/// the search depth will not be altered to be less than this, only deeper.
+	// Minimum ply depth. Except for the standard alpha/beta behaviour,
+	// the search depth will not be altered to be less than this, only deeper.
 	#define __MIN_PLY_DEPTH (5)
-	/// If 1, only the moves of the current players are regarded (not the countermoves)
-	/// and are NOT evaluated. Quite useless, so always use > 2.
-	/// Depth 1 will almost certainly not properly detect when the game has ended, too.
+	// If 1, only the moves of the current players are regarded (not the countermoves)
+	// and are NOT evaluated. Quite useless, so always use > 2.
+	// Depth 1 will almost certainly not properly detect when the game has ended, too.
 	#define MAX_PLY_DEPTH (6)
-	/// Responses to check do not count as a ply while searching ('check extension'),
-	/// to prevent eternal loops, there's a maximum of extensions allowed per search path:
+	// Responses to check do not count as a ply while searching ('check extension'),
+	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
 
-	#define PRINT_MOVES (false)		/// Prints all moves at root level
-	#define PRINT_ALL_MOVES (false)	/// Prints the entire thinking tree
+	// Prints all moves at root level
+	#define PRINT_MOVES (false)
+	// Prints the entire thinking tree
+	#define PRINT_ALL_MOVES (false)
 #else
 	#define __MIN_PLY_DEPTH (2)
 	#define MAX_PLY_DEPTH (2)
 	#define MAX_EXTRA_PLY_DEPTH (0)
 	#define PRINT_MOVES (true)
 	#define PRINT_ALL_MOVES (true)
- 	#undef THREADS 	/// Disable multithreading
+	// Prints the reasoning behind evaluation
+	#define PRINT_EVAL (1)
+	// Disable multithreading
+ 	#undef THREADS
 #endif
 
 // Minimum fitness that a board evaluation can produce. Means white wins.
@@ -85,8 +91,8 @@
 /*******************************************************************************************
  * Some flags for enabling debug output
  */
-#define DRAW_THINKING (false)	/// Prints a few moves, that are being considered
-#define DRAW_STATS (false)
+#define PRINT_THINKING (false)	/// Prints a few moves, that are being considered
+#define PRINT_STATS (false)
 #define DEBUG_KEEP_MOVES_SORTED (false)
 
 #endif

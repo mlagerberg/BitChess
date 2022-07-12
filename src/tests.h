@@ -30,8 +30,8 @@ int test_engine();
 void test_check(int player);
 
 /**
- * Evaluates the position of a random board
+ * Evaluates the position of a random board, and shows its reasoning.
  */
-int test_evaluation();
+void test_evaluation();
 
 #endif
