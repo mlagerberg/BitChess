@@ -38,7 +38,7 @@ Board *debug_generate_random() {
 		}
 	}
 
-	// File the board with random pieces:
+	// Fill the board with random pieces:
 	int x, y, shape, color;
 	for(i = 0; i < 5; i++) {
 		x = rand() % 8;

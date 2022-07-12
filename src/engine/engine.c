@@ -125,7 +125,7 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	int total = v_get_all_valid_moves_for_color(&head, board, color);
 	// No reason to evaluate forced moves:
 	if (total == 1) {
-		if (DRAW_STATS || verbosity > 1) {
+		if (PRINT_STATS || verbosity > 1) {
 			printf("Only one move possible, no moves evaluated.\n");
 		}
 		return head;
@@ -135,7 +135,7 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	create_shuffled_array(arr, head, total);
 	// Find the best move:
 	head = get_best_move(board, stats, color, ply_depth, arr, total);
-	if (DRAW_STATS || verbosity > 1) {
+	if (PRINT_STATS || verbosity > 1) {
 		stop_time = clock();
 		double duration = ((double) (stop_time - start_time)) / CLOCKS_PER_SEC;
 		duration /= MAX_THREADS;
@@ -240,7 +240,7 @@ void *evaluate_moves(void *threadarg) {
 	int i;
 	unsigned int killers[MAX_PLY_DEPTH + MAX_EXTRA_PLY_DEPTH] = { 0 };
 
-	if (DRAW_MOVES) {
+	if (PRINT_MOVES) {
 		printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
 	}
 
@@ -248,14 +248,14 @@ void *evaluate_moves(void *threadarg) {
 	int beta = MAX_FITNESS;
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
-		if (DRAW_MOVES) {
+		if (PRINT_MOVES) {
 			printf("\n[%d-%d:%d] %s%c%d-%c%d%s\n",
 				data->from, data->to, i,
 				white ? color_white : color_black,
 				data->head[i]->x + 'a', 8 - data->head[i]->y,
 				data->head[i]->xx + 'a', 8 - data->head[i]->yy,
 				resetcolor);
-		} else if (DRAW_ALL_MOVES) {
+		} else if (PRINT_ALL_MOVES) {
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
 			printf(" >");
@@ -279,7 +279,7 @@ void *evaluate_moves(void *threadarg) {
 			data->head[i]->gives_draw = true;
 		}
 
-		if (DRAW_ALL_MOVES) {
+		if (PRINT_ALL_MOVES) {
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
 			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);			
@@ -287,13 +287,13 @@ void *evaluate_moves(void *threadarg) {
 
 		// Restore the board
 		Board_undo_move(data->board, umove);
-		if (DRAW_THINKING) {
+		if (PRINT_THINKING) {
 			if ((white && data->head[i]->fitness > best_fitness) || (!white && data->head[i]->fitness < best_fitness)) {
 				best_fitness = data->head[i]->fitness;
 				printf("  Considering ");
 				Move_print(data->head[i]);
 			}
-		} else if (!DRAW_ALL_MOVES && draw_progress) {
+		} else if (!PRINT_ALL_MOVES && draw_progress) {
 			printf(".");
 			fflush(stdout);
 		}
@@ -333,7 +333,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			stats->boards_evaluated++;
 			result[0] = Board_evaluate(board);
 			result[1] = 0;
-			if (DRAW_ALL_MOVES) {
+			if (PRINT_ALL_MOVES) {
 				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
 			}
 			return result;
@@ -369,7 +369,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 	quiescence_score /= 2;
 	Move *curr = moves;
 	while (curr) {
-		if (DRAW_ALL_MOVES) {
+		if (PRINT_ALL_MOVES) {
 			print_depth(depth);
 			Move_print_color(curr, color);
 			printf(" >");
@@ -396,7 +396,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		int result = ab[0];
 		Board_undo_move(board, umove);
 		Undo_destroy(umove);
-		if (DRAW_ALL_MOVES && depth > 1) {
+		if (PRINT_ALL_MOVES && depth > 1) {
 			print_depth(depth);
 			curr->fitness = result;
 			Move_print_color(curr, color);

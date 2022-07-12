@@ -48,14 +48,14 @@
 	/// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
 
-	#define DRAW_MOVES (false)		/// Prints all moves at root level
-	#define DRAW_ALL_MOVES (false)	/// Prints the entire thinking tree
+	#define PRINT_MOVES (false)		/// Prints all moves at root level
+	#define PRINT_ALL_MOVES (false)	/// Prints the entire thinking tree
 #else
 	#define __MIN_PLY_DEPTH (2)
 	#define MAX_PLY_DEPTH (2)
 	#define MAX_EXTRA_PLY_DEPTH (0)
-	#define DRAW_MOVES (true)
-	#define DRAW_ALL_MOVES (true)
+	#define PRINT_MOVES (true)
+	#define PRINT_ALL_MOVES (true)
  	#undef THREADS 	/// Disable multithreading
 #endif
 
