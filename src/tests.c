@@ -153,3 +153,14 @@ int test_moves() {
 
 	return ok;
 }
+
+int test_evaluation() {
+	Board *b = debug_generate_random();
+	printf("Test evaluation on random board:\n");
+	Board_print(b, WHITE);
+	printf("Evaluation:\n");
+	int value = Board_evaluate(b);
+	printf("%d\n",value);
+	Board_destroy(b);
+	return 1;
+}

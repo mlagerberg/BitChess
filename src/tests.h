@@ -29,5 +29,9 @@ int test_engine();
  */
 void test_check(int player);
 
+/**
+ * Evaluates the position of a random board
+ */
+int test_evaluation();
 
 #endif
