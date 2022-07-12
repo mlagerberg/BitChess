@@ -51,11 +51,11 @@
 	#define DRAW_MOVES (false)		/// Prints all moves at root level
 	#define DRAW_ALL_MOVES (false)	/// Prints the entire thinking tree
 #else
-	#define __MIN_PLY_DEPTH (3)
-	#define MAX_PLY_DEPTH (3)
-	#define MAX_EXTRA_PLY_DEPTH (1)
-	#define DRAW_MOVES (false)
-	#define DRAW_ALL_MOVES (false)
+	#define __MIN_PLY_DEPTH (2)
+	#define MAX_PLY_DEPTH (2)
+	#define MAX_EXTRA_PLY_DEPTH (0)
+	#define DRAW_MOVES (true)
+	#define DRAW_ALL_MOVES (true)
  	#undef THREADS 	/// Disable multithreading
 #endif
 
