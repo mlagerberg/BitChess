@@ -36,14 +36,14 @@ char* BACKUP_MOVES_FILE = "moves.bak";
 char* YEAR = &__DATE__[7];
 
 
-/// Level of verbosity. The higher the more output
-/// Silenced by using -s at the cli.
+// Level of verbosity. The higher the more output
+// Silenced by using -s at the cli.
 static int verbosity = 2;
-/// If true, performs the move without having the AI player do a counter move.
-/// Enabled by using -x argument.
+// If true, performs the move without having the AI player do a counter move.
+// Enabled by using -x argument.
 static int no_counter = 0;
-/// Using the -m command, this toggles between shorthand (algebraic)
-/// and simple move notation.
+// Using the -m command, this toggles between shorthand (algebraic)
+// and simple move notation.
 static bool algebraic = true;
 
 

@@ -68,7 +68,7 @@
 /// Max ply depth used when calculating for the opening book
 /// Minimum ply depth will be OPENING_BOOK_MAX_PLY_DEPTH - MIN_PLY_DEPTH_REMAINDER
 #define OPENING_BOOK_MAX_PLY_DEPTH (6)
-/// If a branch of moves has a quiescence score that it above the threshold,
+/// If a branch of moves has a quiescence score that is above the threshold,
 /// it won't be branched at the minimum ply depth. 
 #define QUIESCENCE_THRESHOLD (100)
 /// A move adds this many 'points' to its score when it is a capture 
@@ -78,7 +78,7 @@
 /// A move adds this many 'points' to its score when a piece is 'hanging'
 // (i.e. attacked and not covered)
 //#define QUIESCENCE_PENALTY_HANGING (60)
-/// Evaluate moves in random order. Usefull for unpredictability,
+/// Evaluate moves in random order. Useful for unpredictability,
 /// but cannot be used when alpha/beta in root level
 #define MOVE_RANDOMIZE (false)
 

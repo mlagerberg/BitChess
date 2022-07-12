@@ -24,7 +24,7 @@ void usage();
  */
 int has_game(int show_error);
 /**
- * Backups an active game to .game.bak
+ * Backs up an active game to .game.bak
  */
 void backup_game(bool whipe_clean);
 /**
