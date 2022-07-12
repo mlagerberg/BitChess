@@ -144,7 +144,7 @@ void Board_print(Board *b, int player) {
 			} else {
 				row = 7-i; col = 7-j;
 			}
-			Piece_print(b->fields[col][row]);
+			Piece_print_color(b->fields[col][row]);
 		}
 		if (player == BLACK) {
 			printf(" ║ %c  ", '1' + i);
@@ -261,14 +261,14 @@ void Board_print_captures(Board *b, int color) {
 	if (color == WHITE) {
 		Capture *curr = b->captures_white;
 		while(curr) {
-			Piece_print(curr->piece);
+			Piece_print_color(curr->piece);
 			printf(" ");
 			curr = curr->next_sibling;
 		}
 	} else if (color == BLACK) {
 		Capture *curr = b->captures_black;
 		while(curr) {
-			Piece_print(curr->piece);
+			Piece_print_color(curr->piece);
 			printf(" ");
 			curr = curr->next_sibling;
 		}

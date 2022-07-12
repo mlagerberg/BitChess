@@ -89,21 +89,27 @@ bool Piece_equals(Piece *left, Piece *right) {
 
 void Piece_print_color(Piece *p) {
 	if (p == NULL) {
-		printf("   ");
+		printf(" ");
 	} else {
 		if (p->color == WHITE) {
-			printf("%s", color_white);
+			printf(cyan);
 		} else {
-			printf("%s", color_black);
+			printf(red);
 		}
 		switch(p->shape) {
-			case PAWN:		printf("♟");	break;
+			// Using the WHITE unicode pieces for all, because we're
+			// colorizing them anyway. BLACK pieces would otherwise be
+			// an outline only, barely colorized.
+			// Note that PAWN is an exception, because we can't colorize it.
+			// The terminal keeps turning it into a black pawn emoji
+			case PAWN:		printf("♙");	break;
 			case ROOK:		printf("♜");	break;
 			case KNIGHT:	printf("♞");	break;
 			case BISHOP:	printf("♝");	break;
 			case QUEEN:		printf("♛");	break;
 			case KING: 		printf("♚");	break;
 		}
+		printf(resetcolor);
 	}
 }
 
