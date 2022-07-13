@@ -49,4 +49,26 @@ inline int get_pawn_count(int cache_pawn_count[2][8], int file, int color) {
 	}
 }
 
+/**
+ * Returns the distance in tiles to the center 4 squares
+ */
+inline int distance_to_center(int i, int j) {
+    int distance = 0;
+    if (i == 2 || i == 5) {
+        distance = 1;
+    } else if (i == 1 || i == 6) {
+        distance = 2;
+    } else if (i == 0 || i == 7) {
+        distance = 3;
+    }
+    if (j == 2 || j == 5) {
+        distance += 1;
+    } else if (j == 1 || j == 6) {
+        distance += 2;
+    } else if (j == 0 || j == 7) {
+        distance += 3;
+    }
+    return distance;
+}
+
 #endif

@@ -15,32 +15,33 @@
 //#define RANDOM_FACTOR 10
 
 // Several penalty or reward values
-const static int DOUBLE_PAWN_PENALTY = -20;			/// Two pawns of player in the same file
-const static int E_AND_D_PENALTY = -10;				/// A pawn in E or D being blocked
-const static int E_AND_D_BLOCKEDPENALTY = -15;		/// A pawn in E or D being blocked by opponent
-const static int PAWN_NEAR_KING_BONUS = 10;			/// Pawn within 2 fields of King (manhattan distance)
-const static int KNIGHT_KING_DIST_PER_TILE = -1;	/// Distance of Knight from King (manhattan distance)
-const static int BISHOP_MIN_MOB_BONUS = -4;			/// For bishops with 3 or less fields available
-const static int BISHOP_MAX_MOB_BONUS = 18;			/// For bishops with 12 or more fields available
-const static int ROOK_MIN_MOB_BONUS = 0;			/// For rooks with 3 or less fields available
-const static int ROOK_MAX_MOB_BONUS = 20;			/// For rooks with 12 or more fields available
-const static int ROOK_NO_FRIENDLY_PAWNS_BONUS = 10;	/// For rooks without friendly pawns in the same file
-const static int ROOK_NO_ENEMY_PAWNS_BONUS = 4;		/// For rooks without enemy pawns in the same file
-const static int QUEEN_KING_DIST_PER_TILE = -1;		/// Manhattan distance between Queen and King, bonus per tile
+const static int DOUBLE_PAWN_PENALTY = -20;			// Two pawns of player in the same file
+const static int E_AND_D_PENALTY = -10;				// A pawn in E or D being blocked
+const static int E_AND_D_BLOCKEDPENALTY = -15;		// A pawn in E or D being blocked by opponent
+const static int PAWN_NEAR_KING_BONUS = 10;			// Pawn within 2 fields of friendly King (manhattan distance)
+const static int KNIGHT_KING_DIST_PER_TILE = -1;	// Distance of Knight from King (manhattan distance)
+const static int ROOK_NO_FRIENDLY_PAWNS_BONUS = 10;	// For rooks without friendly pawns in the same file
+const static int ROOK_NO_ENEMY_PAWNS_BONUS = 4;		// For rooks without enemy pawns in the same file
+const static int QUEEN_KING_DIST_PER_TILE = -1;		// Manhattan distance between Queen and King, bonus per tile
 
-/// Material values of the pieces
+// Material values of the pieces
 const static int MATERIAL_VALUE[5] = {100,520,330,330,980};
-/// Penalties for isolated pawns
+// Penalties for isolated pawns
 const static int ISO_PENALTY[8] = {-12,-14,-16,-20,-20,-16,-14,-12};
-/// Knights get rewarded when close to the center,
-/// the index is the distance in tiles to the four center squares
+// Knights get rewarded when close to the center,
+// the index is the distance in tiles to the four center squares
 const static int KNIGHT_CENTER_BONUS[7] = {30,25,20,15,10,5,0};
-/// King get rewarded or fined when close to the center,
-/// depending on the stage of the game.
-/// The index represents progress (7 being the end game, 0 being opening)
-/// There's no bonus when opponent has 1 or more pawns in 3 files around king.
+// King get rewarded or fined when close to the center,
+// depending on the stage of the game.
+// The index represents progress (7 being the end game, 0 being opening)
+// There's no bonus when opponent has 1 or more pawns in 3 files around king.
 const static int KING_CENTER_BONUS[8] = {36,24,16,8,0,-8,-16,-24};
-
+// Mobility bonus for Rooks
+// Lowest for rooks with 3 possible moves, most for those with 12
+const static int ROOK_MOB_BONUS[5] = {0,6,10,13,20};
+// Mobility bonus for Bishops
+// Lowest for bishops with 3 possible moves, most for those with 12
+const static int BISHOP_MOB_BONUS[5] = {-4,1,7,10,18};
 
 extern inline int max(int a, int b);
 
@@ -139,7 +140,7 @@ int Fitness_calculate(Board *board) {
 					#endif
 				}
 				// Check for e and d pawns being blocked by opponent
-				if ((i==3 || i==4) && j==(piece->color == BLACK ? 4 : 3)) {
+				if ((i == 3 || i == 4) && j == (piece->color == BLACK ? 4 : 3)) {
 					result += piece->color * E_AND_D_PENALTY;
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  e&d\t", piece->color * E_AND_D_PENALTY, result);
@@ -171,21 +172,7 @@ int Fitness_calculate(Board *board) {
 				Fitness_debug(i, j, piece, "knight\t", piece->color * MATERIAL_VALUE[KNIGHT], result);
 				#endif
 				// Reward short distance to center
-				int distance = 0;
-				if (i == 2 || i == 5) {
-					distance = 1;
-				} else if (i == 1 || i == 6) {
-					distance = 2;
-				} else if (i == 0 || i == 7) {
-					distance=3;
-				}
-				if (j==2 || j==5) {
-					distance += 1;
-				} else if (j == 1 || j == 6) {
-					distance += 2;
-				} else if (j == 0 || j == 7) {
-					distance += 3;
-				}
+				int distance = distance_to_center(i, j);
 				result += piece->color * KNIGHT_CENTER_BONUS[distance];
 				#ifdef PRINT_EVAL
 				Fitness_debug(i, j, piece, "  near center", piece->color * KNIGHT_CENTER_BONUS[distance], result);
@@ -206,15 +193,15 @@ int Fitness_calculate(Board *board) {
 				int mobility = v_get_rough_move_count_for_piece(board, i, j);
 				int bonus = 0;
 				if (mobility >= 12) {
-					bonus = BISHOP_MAX_MOB_BONUS;
+					bonus = BISHOP_MOB_BONUS[4];
 				} else if (mobility >= 9) {
-					bonus = (2 * BISHOP_MAX_MOB_BONUS + BISHOP_MIN_MOB_BONUS) / 3;
+					bonus = BISHOP_MOB_BONUS[3];
 				} else if (mobility >= 6) {
-					bonus = (BISHOP_MAX_MOB_BONUS + BISHOP_MIN_MOB_BONUS) / 2;
+					bonus = BISHOP_MOB_BONUS[2];
 				} else if (mobility >= 3) {
-					bonus = (BISHOP_MAX_MOB_BONUS + 2 * BISHOP_MIN_MOB_BONUS) / 3;
+					bonus = BISHOP_MOB_BONUS[1];
 				} else {
-					bonus = BISHOP_MIN_MOB_BONUS;
+					bonus = BISHOP_MOB_BONUS[0];
 				}
 				result += piece->color * bonus;
 				#ifdef PRINT_EVAL
@@ -229,15 +216,15 @@ int Fitness_calculate(Board *board) {
 				int mobility = v_get_rough_move_count_for_piece(board, i, j);
 				int bonus = 0;
 				if (mobility >= 12) {
-					bonus = ROOK_MAX_MOB_BONUS;
-				} else if (mobility >=9) {
-					bonus = (2 * ROOK_MAX_MOB_BONUS + ROOK_MIN_MOB_BONUS) / 3;
+					bonus = ROOK_MOB_BONUS[4];
+				} else if (mobility >= 9) {
+					bonus = ROOK_MOB_BONUS[3];
 				} else if (mobility >= 6) {
-					bonus = (ROOK_MAX_MOB_BONUS + ROOK_MIN_MOB_BONUS) / 2;
+					bonus = ROOK_MOB_BONUS[2];
 				} else if (mobility >= 3) {
-					bonus = (ROOK_MAX_MOB_BONUS + 2*ROOK_MIN_MOB_BONUS) / 3;
+					bonus = ROOK_MOB_BONUS[1];
 				} else {
-					bonus = ROOK_MIN_MOB_BONUS;
+					bonus = ROOK_MOB_BONUS[0];
 				}
 				result += piece->color * bonus;
 				#ifdef PRINT_EVAL
@@ -281,21 +268,7 @@ int Fitness_calculate(Board *board) {
 				// Fine/reward king according to distance to center and game state.
 				// King near center gets -24 penalty when game is opening and +36 when game is ending.
 				// No bonus when opponent has 1 or more pawns in 3 files around king
-				int distance = 0;
-				if (i == 2 || i == 5) {
-					distance = 1;
-				} else if (i == 1 || i == 6) {
-					distance = 2;
-				} else if (i == 0 || i == 7) {
-					distance = 3;
-				}
-				if (j == 2 || j == 5) {
-					distance += 1;
-				} else if (j == 1 || j == 6) {
-					distance += 2;
-				} else if (j == 0 || j == 7) {
-					distance += 3;
-				}
+				int distance = distance_to_center(i, j);
 				int progress = (int) max(1, head_count[piece->color == BLACK ? 0 : 1] / 2);
 				int bonus = (distance / 6) * KING_CENTER_BONUS[progress - 1];
 				int pawns = get_pawn_count(cache_pawn_count, i, -piece->color);
