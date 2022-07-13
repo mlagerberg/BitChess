@@ -55,12 +55,15 @@ static void print_depth(int depth) {
  * Returns the best move from the given list of moves. The given list
  * of moves <strong>must be usable as an array</strong>, like so:
  * 	head[0]->fitness = 0; head[1]->fitness = 0; // etc.
- * <strong>So a list of individual moves linkes together by their ->next_sibling is NOT ok.</strong>
+ * <strong>So a list of individual moves linked together by their ->next_sibling is NOT ok.</strong>
  * The length of the list must be specified in the last parameter.
  * 
  * The list of moves is send in chunks to evaluate_moves after which the
  * move with best value is picked (or randomly one of the moves within 10% 'distance'
  * from the best move).
+ * 
+ * If multithreading is disabled this method straight up just calls
+ * evaluate_moves with all the parameters wrapped in a ThreadData object.
  */
 static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth, Move **head, int total);
 
@@ -284,9 +287,10 @@ void *evaluate_moves(void *threadarg) {
 		}
 
 		#ifdef PRINT_MOVES
-			printf("\n[%d-%d:%d] ", data->from, data->to, i);
+			printf("[%d-%d:%d] ", data->from, data->to, i);
 			Move_print_color(move, data->color);
 			printf(", evaluation: %d", move->fitness);
+			printf("\n");
 		#endif
 
 		#ifdef PRINT_ALL_MOVES
@@ -326,14 +330,16 @@ void *evaluate_moves(void *threadarg) {
 				alpha = move->fitness;
 			}
 			if (alpha >= beta) {
-				break;
+				printf("%d >= %d, cutoff point\n", alpha, beta);
+				//break;
 			}
 		} else {
 			if (move->fitness < beta) {
 				beta = move->fitness;
 			}
 			if (alpha >= beta) {
-				break;
+				printf("%d >= %d, cutoff point\n", alpha, beta);
+				//break;
 			}
 		}
 	}

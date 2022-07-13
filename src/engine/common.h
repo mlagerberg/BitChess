@@ -49,8 +49,8 @@
 	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
 #else
-	#define __MIN_PLY_DEPTH (1)
-	#define MAX_PLY_DEPTH (1)
+	#define __MIN_PLY_DEPTH (2)
+	#define MAX_PLY_DEPTH (2)
 	#define MAX_EXTRA_PLY_DEPTH (0)
 	// Prints the reasoning behind evaluation
 	//#define PRINT_EVAL (1)
@@ -69,23 +69,24 @@
 #define MIN_FITNESS (-1000000)
 // Maximum fitness that a board evaluation can produce. Means black wins.
 #define MAX_FITNESS (1000000)
-/// When the mininum ply depth is X, this value should be MAX_PLY_DEPTH - X
+// When the mininum ply depth is X, this value should be MAX_PLY_DEPTH - X
 #define MIN_PLY_DEPTH_REMAINDER (MAX_PLY_DEPTH - __MIN_PLY_DEPTH)
-/// Max ply depth used when calculating for the opening book
-/// Minimum ply depth will be OPENING_BOOK_MAX_PLY_DEPTH - MIN_PLY_DEPTH_REMAINDER
-#define OPENING_BOOK_MAX_PLY_DEPTH (6)
-/// If a branch of moves has a quiescence score that is above the threshold,
-/// it won't be branched at the minimum ply depth. 
+// Max ply depth used when calculating for the opening book
+// Minimum ply depth will be OPENING_BOOK_MAX_PLY_DEPTH - MIN_PLY_DEPTH_REMAINDER
+// Not used at the moment.
+//#define OPENING_BOOK_MAX_PLY_DEPTH (6)
+// If a branch of moves has a quiescence score that is above the threshold,
+// it won't be branched at the minimum ply depth. 
 #define QUIESCENCE_THRESHOLD (100)
-/// A move adds this many 'points' to its score when it is a capture 
+// A move adds this many 'points' to its score when it is a capture 
 #define QUIESCENCE_PENALTY_CAPTURE (100)
-/// A move adds this many 'points' to its score when a piece is pinned
+// A move adds this many 'points' to its score when a piece is pinned
 //#define QUIESCENCE_PENALTY_PINNED (60)
-/// A move adds this many 'points' to its score when a piece is 'hanging'
+// A move adds this many 'points' to its score when a piece is 'hanging'
 // (i.e. attacked and not covered)
 //#define QUIESCENCE_PENALTY_HANGING (60)
-/// Evaluate moves in random order. Useful for unpredictability,
-/// but cannot be used when alpha/beta in root level
+// Evaluate moves in random order. Useful for unpredictability,
+// but cannot be used when alpha/beta in root level
 #define MOVE_RANDOMIZE (false)
 
 /*******************************************************************************************
