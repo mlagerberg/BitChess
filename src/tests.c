@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "engine/datatypes.h"
 #include "engine/board.h"
+#include "engine/files.h"
 #include "engine/piece.h"
 #include "engine/move.h"
 
@@ -155,8 +156,10 @@ int test_moves() {
 }
 
 void test_evaluation() {
-	Board *b = debug_generate_random();
-	printf("Test evaluation on random board:\n");
+	//Board *b = debug_generate_random();
+	char* testfile = "./testgames/test1";
+	Board *b = Board_read(testfile);
+	printf("Test evaluation on board:\n");
 	Board_print(b, WHITE);
 	printf("Evaluation:\n");
 	int value = Board_evaluate(b);
