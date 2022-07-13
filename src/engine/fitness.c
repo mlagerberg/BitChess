@@ -154,13 +154,13 @@ int Fitness_calculate(Board *board) {
 				}
 				// Reward pawns near king (within 2 tiles distance)
 				if (piece->color == BLACK) {
-					if (max(abs(i - kings_pos[0][0]), abs(j - kings_pos[0][1])) <= 2) {
+					if (abs(i - kings_pos[0][0]) + abs(j - kings_pos[0][1]) <= 2) {
 						result += piece->color * PAWN_NEAR_KING_BONUS;
 						#ifdef PRINT_EVAL
 						Fitness_debug(i, j, piece, "  near king\t", piece->color * PAWN_NEAR_KING_BONUS, result);
 						#endif
 					}
-				} else if (max(abs(i - kings_pos[1][0]), abs(j - kings_pos[1][1])) <= 2) {
+				} else if (abs(i - kings_pos[1][0]) + abs(j - kings_pos[1][1]) <= 2) {
 					result += piece->color * PAWN_NEAR_KING_BONUS;
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  near king\t", piece->color * PAWN_NEAR_KING_BONUS, result);
