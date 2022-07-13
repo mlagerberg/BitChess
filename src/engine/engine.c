@@ -349,22 +349,7 @@ void *evaluate_moves(void *threadarg) {
 
 static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
 	static int result[2];
-
 	stats->moves_count++;
-	// Stop when at maximum search depth
-	if (depth + extra_depth <= MIN_PLY_DEPTH_REMAINDER) {
-		// No need to go beyond MIN_PLY_DEPTH if move is 'quiet':
-		bool allow_pruning = (quiescence_score < QUIESCENCE_THRESHOLD);
-		if (allow_pruning || depth + extra_depth <= 0) {
-			stats->boards_evaluated++;
-			result[0] = Board_evaluate(board);
-			result[1] = 0;
-			#ifdef PRINT_ALL_MOVES
-				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
-			#endif
-			return result;
-		}
-	}
 
 	// Check if we've won/lost.
 	bool at_check = v_king_at_check(board, color);
@@ -387,6 +372,21 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			result[1] = STALE_MATE;
 		}
 		return result;
+	}
+
+	// Stop when at maximum search depth
+	if (depth + extra_depth <= MIN_PLY_DEPTH_REMAINDER) {
+		// No need to go beyond MIN_PLY_DEPTH if move is 'quiet':
+		bool allow_pruning = (quiescence_score < QUIESCENCE_THRESHOLD);
+		if (allow_pruning || depth + extra_depth <= 0) {
+			stats->boards_evaluated++;
+			result[0] = Board_evaluate(board);
+			result[1] = 0;
+			#ifdef PRINT_ALL_MOVES
+				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
+			#endif
+			return result;
+		}
 	}
 
 	// Sort the killer move to the front
