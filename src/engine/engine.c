@@ -37,6 +37,7 @@ typedef struct ThreadData {
  * Prints an indent suitable for the current search depth.
  * Used when printing a tree of available moves and counter moves.
  */
+#ifdef PRINT_ALL_MOVES
 static void print_depth(int depth) {
 	if (depth == 1) {
 		printf("\n.   .   ");
@@ -48,6 +49,7 @@ static void print_depth(int depth) {
 		printf("\n");
 	}
 }
+#endif
 
 /**
  * Returns the best move from the given list of moves. The given list
@@ -236,30 +238,35 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 void *evaluate_moves(void *threadarg) {
 	ThreadData *data = (ThreadData *) threadarg;
 	bool white = (data->color == WHITE);
-	int best_fitness = white ? MIN_FITNESS : MAX_FITNESS;
 	int i;
 	unsigned int killers[MAX_PLY_DEPTH + MAX_EXTRA_PLY_DEPTH] = { 0 };
 
-	if (PRINT_MOVES) {
-		printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
-	}
+	#ifdef PRINT_THINKING
+	int best_fitness = white ? MIN_FITNESS : MAX_FITNESS;
+	#endif
+
+	#ifdef PRINT_MOVES
+	printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
+	#endif
 
 	int alpha = MIN_FITNESS;
 	int beta = MAX_FITNESS;
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
-		if (PRINT_MOVES) {
+		#ifdef PRINT_MOVES
 			printf("\n[%d-%d:%d] %s%c%d-%c%d%s\n",
 				data->from, data->to, i,
 				white ? color_white : color_black,
 				data->head[i]->x + 'a', 8 - data->head[i]->y,
 				data->head[i]->xx + 'a', 8 - data->head[i]->yy,
 				resetcolor);
-		} else if (PRINT_ALL_MOVES) {
+		#else
+			#ifdef PRINT_ALL_MOVES
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
 			printf(" >");
-		}
+			#endif
+		#endif
 		// Perform the move
 		UndoableMove *umove = Board_do_move(data->board, data->head[i]);
 		// Recurse!
@@ -279,24 +286,26 @@ void *evaluate_moves(void *threadarg) {
 			data->head[i]->gives_draw = true;
 		}
 
-		if (PRINT_ALL_MOVES) {
+		#ifdef PRINT_ALL_MOVES
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
 			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);			
-		}
+		#endif
 
 		// Restore the board
 		Board_undo_move(data->board, umove);
-		if (PRINT_THINKING) {
+		#ifdef PRINT_THINKING
 			if ((white && data->head[i]->fitness > best_fitness) || (!white && data->head[i]->fitness < best_fitness)) {
 				best_fitness = data->head[i]->fitness;
 				printf("  Considering ");
 				Move_print(data->head[i]);
 			}
-		} else if (!PRINT_ALL_MOVES && draw_progress) {
-			printf(".");
-			fflush(stdout);
-		}
+		#else
+			if (draw_progress) {
+				printf(".");
+				fflush(stdout);
+			}
+		#endif
 		Undo_destroy(umove);
 
 		// Check for alpha/beta cut-offs
@@ -333,9 +342,9 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			stats->boards_evaluated++;
 			result[0] = Board_evaluate(board);
 			result[1] = 0;
-			if (PRINT_ALL_MOVES) {
+			#ifdef PRINT_ALL_MOVES
 				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
-			}
+			#endif
 			return result;
 		}
 	}
@@ -369,11 +378,11 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 	quiescence_score /= 2;
 	Move *curr = moves;
 	while (curr) {
-		if (PRINT_ALL_MOVES) {
+		#ifdef PRINT_ALL_MOVES
 			print_depth(depth);
 			Move_print_color(curr, color);
 			printf(" >");
-		}
+		#endif
 
 		UndoableMove *umove = Board_do_move(board, curr);
 		int score = Move_quiescence(umove, board);
@@ -396,12 +405,14 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		int result = ab[0];
 		Board_undo_move(board, umove);
 		Undo_destroy(umove);
-		if (PRINT_ALL_MOVES && depth > 1) {
-			print_depth(depth);
-			curr->fitness = result;
-			Move_print_color(curr, color);
-			printf(" %s< %d%s", color==WHITE ? color_white : color_black, result, resetcolor);
-		}
+		#ifdef PRINT_ALL_MOVES
+			if (depth > 1) {
+				print_depth(depth);
+				curr->fitness = result;
+				Move_print_color(curr, color);
+				printf(" %s< %d%s", color==WHITE ? color_white : color_black, result, resetcolor);
+			}
+		#endif
 
 		// The crux of the alpha-beta algorithm:
 		// Breaking out of the loop if a certain minimum value
@@ -453,26 +464,24 @@ static void create_shuffled_array(Move **arr, Move *head, int total) {
 		}
 	}
 
-	if (DEBUG_KEEP_MOVES_SORTED) {
-		return;
-	}
-
-	// Shuffle array by randomly swapping elements
-	for (i = 0; i < total; i++) {
-		// Swap move at i with move at a random position
-		int target = rand() % total;
-		if (target != i) {
-			Move *temp = arr[i];
-			arr[i] = arr[target];
-			arr[target] = temp;
+	#ifndef DEBUG_KEEP_MOVES_SORTED
+		// Shuffle array by randomly swapping elements
+		for (i = 0; i < total; i++) {
+			// Swap move at i with move at a random position
+			int target = rand() % total;
+			if (target != i) {
+				Move *temp = arr[i];
+				arr[i] = arr[target];
+				arr[target] = temp;
+			}
 		}
-	}
 
-	// Restore the ->next_sibling pointers to the new order
-	if (total > 1) {
-		for (i = 0; i < total - 1; i++) {
-			arr[i]->next_sibling = arr[i+1];
+		// Restore the ->next_sibling pointers to the new order
+		if (total > 1) {
+			for (i = 0; i < total - 1; i++) {
+				arr[i]->next_sibling = arr[i+1];
+			}
+			arr[total-1]->next_sibling = NULL;
 		}
-		arr[total-1]->next_sibling = NULL;
-	}
+	#endif
 }

@@ -48,19 +48,19 @@
 	// Responses to check do not count as a ply while searching ('check extension'),
 	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
-
-	// Prints all moves at root level
-	#define PRINT_MOVES (false)
-	// Prints the entire thinking tree
-	#define PRINT_ALL_MOVES (false)
 #else
 	#define __MIN_PLY_DEPTH (2)
 	#define MAX_PLY_DEPTH (2)
 	#define MAX_EXTRA_PLY_DEPTH (0)
-	#define PRINT_MOVES (true)
-	#define PRINT_ALL_MOVES (true)
 	// Prints the reasoning behind evaluation
 	#define PRINT_EVAL (1)
+	// Prints all moves at root level
+	//#define PRINT_MOVES (1)
+	// Prints the entire thinking tree
+	//#define PRINT_ALL_MOVES (1)
+	// Prints a few moves, that are being considered
+	//#define PRINT_THINKING (1)
+	//#define DEBUG_KEEP_MOVES_SORTED (1)
 	// Disable multithreading
  	#undef THREADS
 #endif
@@ -91,8 +91,6 @@
 /*******************************************************************************************
  * Some flags for enabling debug output
  */
-#define PRINT_THINKING (false)	/// Prints a few moves, that are being considered
 #define PRINT_STATS (false)
-#define DEBUG_KEEP_MOVES_SORTED (false)
 
 #endif
