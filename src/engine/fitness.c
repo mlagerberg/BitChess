@@ -47,7 +47,7 @@ extern inline int max(int a, int b);
 
 extern inline int min(int a, int b);
 
-extern inline int get_pawn_count(int cache_pawn_count[2][8], int file, int color);
+extern inline int get_pawn_count_in_file(int cache_pawn_count[2][8], int file, int color);
 
 #ifdef PRINT_EVAL
 char *Fitness_square(int i, int j) {
@@ -126,14 +126,14 @@ int Fitness_calculate(Board *board) {
 				Fitness_debug(i, j, piece, "pawn\t\t", piece->color * MATERIAL_VALUE[PAWN], result);
 				#endif
 				// Check for isolated (= badly defended) pawns
-				if (get_pawn_count(cache_pawn_count, i-1, piece->color) == 0 && get_pawn_count(cache_pawn_count, i+1, piece->color) == 0) {
+				if (get_pawn_count_in_file(cache_pawn_count, i-1, piece->color) == 0 && get_pawn_count_in_file(cache_pawn_count, i+1, piece->color) == 0) {
 					result += piece->color * ISO_PENALTY[i];
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  bad defense", piece->color * ISO_PENALTY[i], result);
 					#endif
 				}
 				// Check for doubled pawns (= obstruction and bad defense)
-				if (get_pawn_count(cache_pawn_count, i, piece->color) > 1) {
+				if (get_pawn_count_in_file(cache_pawn_count, i, piece->color) > 1) {
 					result += piece->color * DOUBLE_PAWN_PENALTY;
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  doubled\t", piece->color * DOUBLE_PAWN_PENALTY, result);
@@ -231,14 +231,14 @@ int Fitness_calculate(Board *board) {
 				Fitness_debug(i, j, piece, "  mobility\t", piece->color * bonus, result);
 				#endif
 				// reward rook when no pawns are on the same file
-				if (get_pawn_count(cache_pawn_count, i,piece->color) == 0) {
+				if (get_pawn_count_in_file(cache_pawn_count, i,piece->color) == 0) {
 					result += piece->color * ROOK_NO_FRIENDLY_PAWNS_BONUS;
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  no friendly pawns", piece->color * ROOK_NO_FRIENDLY_PAWNS_BONUS, result);
 					#endif
 				}
-				if (get_pawn_count(cache_pawn_count, i,-piece->color) == 0) {
-					result += piece->color*ROOK_NO_ENEMY_PAWNS_BONUS;
+				if (get_pawn_count_in_file(cache_pawn_count, i,-piece->color) == 0) {
+					result += piece->color * ROOK_NO_ENEMY_PAWNS_BONUS;
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  no enemy pawns", piece->color * ROOK_NO_ENEMY_PAWNS_BONUS, result);
 					#endif
@@ -268,20 +268,32 @@ int Fitness_calculate(Board *board) {
 				// Fine/reward king according to distance to center and game state.
 				// King near center gets -24 penalty when game is opening and +36 when game is ending.
 				// No bonus when opponent has 1 or more pawns in 3 files around king
-				int distance = distance_to_center(i, j);
+				float distance = (float) distance_to_center(i, j);
 				int progress = (int) max(1, head_count[piece->color == BLACK ? 0 : 1] / 2);
-				int bonus = (distance / 6) * KING_CENTER_BONUS[progress - 1];
-				int pawns = get_pawn_count(cache_pawn_count, i, -piece->color);
+				int bonus = (int) ((distance / 6.0) * KING_CENTER_BONUS[progress - 1]);
+				// Enemy pawns in the same file as the king
+				int pawns = get_pawn_count_in_file(cache_pawn_count, i, -piece->color);
 				#ifdef PRINT_EVAL
 				Fitness_debug(i, j, piece, "king - game progress (.5x headcount)", progress, 0);
-				Fitness_debug(i, j, piece, "king - center distance", distance, 0);
+				Fitness_debug(i, j, piece, "king - center distance", (int) distance, 0);
 				Fitness_debug(i, j, piece, "king - resulting bonus", bonus, 0);
+				Fitness_debug(i, j, piece, "king - pawns near", i, 0);
 				#endif
 				if (i > 0) {
-					pawns = pawns + get_pawn_count(cache_pawn_count, i-1, -piece->color);
+					// Enemy pawns in one file to the left of the king
+					int more_pawns = get_pawn_count_in_file(cache_pawn_count, i-1, -piece->color);
+					pawns = pawns + more_pawns;
+					#ifdef PRINT_EVAL
+					Fitness_debug(i, j, piece, "king - more pawns near", more_pawns, 0);
+					#endif
 				}
 				if (i < 7) {
-					pawns = pawns + get_pawn_count(cache_pawn_count, i+1, -piece->color);
+					// Enemy pawns in one file to the right of the king
+					int more_pawns = get_pawn_count_in_file(cache_pawn_count, i+1, -piece->color);
+					pawns = pawns + more_pawns;
+					#ifdef PRINT_EVAL
+					Fitness_debug(i, j, piece, "king - more pawns near", more_pawns, 0);
+					#endif
 				}
 				if (pawns > 1) {
 					bonus = min(bonus, 0);

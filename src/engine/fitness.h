@@ -38,7 +38,7 @@ inline int min(int a, int b) {
  * Returns the number of pawns of the given color in the given file,
  * by looking it up in the given lookup table.
  */
-inline int get_pawn_count(int cache_pawn_count[2][8], int file, int color) {
+inline int get_pawn_count_in_file(int cache_pawn_count[2][8], int file, int color) {
 	if (file < 0 || file > 7) {
 		return 0;
 	}
