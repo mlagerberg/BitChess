@@ -261,7 +261,7 @@ int Fitness_calculate(Board *board) {
 							* QUEEN_KING_DIST_PER_TILE
 							* (abs(kings_pos[1][0] - i) + abs(kings_pos[1][1] - j));
 					#ifdef PRINT_EVAL
-					Fitness_debug(i, j, piece, "  distance to king", piece->color * QUEEN_KING_DIST_PER_TILE * (abs(kings_pos[0][0] - i) + abs(kings_pos[0][1] - j)), result);
+					Fitness_debug(i, j, piece, "  distance to king", piece->color * QUEEN_KING_DIST_PER_TILE * (abs(kings_pos[1][0] - i) + abs(kings_pos[1][1] - j)), result);
 					#endif
 				}
 			} else if (piece->shape == KING) {
