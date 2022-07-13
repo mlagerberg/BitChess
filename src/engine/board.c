@@ -606,7 +606,11 @@ Board *Board_read(const char *filename) {
 				board->fields[i][j] = Piece_parse(buf);
 			}
 			// Consume newline
-			fgetc(file);
+			char newline = fgetc(file);
+			if (newline == '\r') {
+				// We have a Windows file, consume a second character for the newline:
+				fgetc(file);
+			}
 		}
 		int cap_white, cap_black, wccqs, wccks, bccqs, bccks, wcep, bcep, ply, fif, state;
 		int ok = fscanf(file, "\n%d %d %d %d %d %d %d %d %d %d %d\n",

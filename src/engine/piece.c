@@ -51,7 +51,7 @@ Piece *Piece_parse(char *symbol) {
 	} else if (symbol[0] == '-') {
 		return NULL;
 	} else {
-		fprintf(stderr, "Invalid player color while parsing piece: %c", *symbol);
+		fprintf(stderr, "Invalid player color while parsing piece: '%c'", *symbol);
 		exit(1);
 	}
 	switch(symbol[1]) {
@@ -62,7 +62,7 @@ Piece *Piece_parse(char *symbol) {
 		case 'Q':	return Piece_create(QUEEN, color);
 		case 'K': 	return Piece_create(KING, color);
 		default:
-			fprintf(stderr, "Invalid piece shape while parsing piece: %c", symbol[1]);
+			fprintf(stderr, "Invalid piece shape while parsing piece: '%c'", symbol[1]);
 			exit(1);
 	}
 	return NULL;
