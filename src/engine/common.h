@@ -53,7 +53,7 @@
 	#define MAX_PLY_DEPTH (2)
 	#define MAX_EXTRA_PLY_DEPTH (0)
 	// Prints the reasoning behind evaluation
-	#define PRINT_EVAL (1)
+	//#define PRINT_EVAL (1)
 	// Prints all moves at root level
 	//#define PRINT_MOVES (1)
 	// Prints the entire thinking tree
