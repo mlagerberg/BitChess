@@ -25,7 +25,7 @@
 
 
 const char* APP = "BitChess";
-const char* VERSION = "0.1.6";
+const char* VERSION = "0.1.7";
 const char* AUTHOR = "Mathijs Lagerberg";
 char* DEFAULT_FILE = "game";
 char* SLOT_FILE = "%i.game";
