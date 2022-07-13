@@ -31,7 +31,8 @@ void test_check(int player);
 
 /**
  * Evaluates the position of a random board, and shows its reasoning.
+ * Returns true if the evaluation matches the expected value.
  */
-void test_evaluation();
+int test_evaluation();
 
 #endif

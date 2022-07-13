@@ -155,14 +155,27 @@ int test_moves() {
 	return ok;
 }
 
-void test_evaluation() {
+int test_evaluation() {
 	//Board *b = debug_generate_random();
 	char* testfile = "./testgames/test1";
+	int expected_result_1 = 8;
 	Board *b = Board_read(testfile);
-	printf("Test evaluation on board:\n");
+	printf("Test evaluation on board 1:\n");
 	Board_print(b, WHITE);
 	printf("Evaluation:\n");
-	int value = Board_evaluate(b);
-	printf("%d\n",value);
+	int value1 = Board_evaluate(b);
+	printf("%d\n", value1);
 	Board_destroy(b);
+
+	testfile = "./testgames/test2";
+	int expected_result_2 = 1024;
+	b = Board_read(testfile);
+	printf("Test evaluation on board 2:\n");
+	Board_print(b, WHITE);
+	printf("Evaluation:\n");
+	int value2 = Board_evaluate(b);
+	printf("%d\n", value2);
+	Board_destroy(b);
+
+	return value1 == expected_result_1 && value2 == expected_result_2;
 }

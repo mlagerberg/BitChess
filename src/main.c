@@ -127,11 +127,11 @@ int main(int argc, char *argv[]) {
 		return !test_moves()
 			|| !test_validator()
 			|| !test_serializer("test.chess")
-			|| !test_engine();
+			|| !test_engine()
+			|| !test_evaluation();
 	} else if (strcmp("testeval", argv[index]) == 0) {
-		// Run tests
-		test_evaluation();
-		return 1;
+		// Run visual test
+		return test_evaluation();
 	} else if (strcmp("-v", argv[index]) == 0
 			|| strcmp("version", argv[index]) == 0
 			|| strcmp("--version", argv[index]) == 0) {
