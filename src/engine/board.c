@@ -138,7 +138,8 @@ void Board_print(Board *b, int player) {
 			printf("%c", '1' + i);
 		}
 		for (j = 0; j < 8; j++) {
-			printf(j == 0 ? " ║ " : " | ");
+			// Other optional bars: │, |, ⏐, ｜ and | (possibly ❘ or ❙)
+			printf(j == 0 ? " ║ " : " │ ");
 			if (player == WHITE) {
 				row = i; col = j;
 			} else {
