@@ -65,9 +65,9 @@
  	#undef THREADS
 #endif
 
-// Minimum fitness that a board evaluation can produce. Means white wins.
+// Minimum fitness that a board evaluation can produce. Means black wins.
 #define MIN_FITNESS (-1000000)
-// Maximum fitness that a board evaluation can produce. Means black wins.
+// Maximum fitness that a board evaluation can produce. Means white wins.
 #define MAX_FITNESS (1000000)
 // When the mininum ply depth is X, this value should be MAX_PLY_DEPTH - X
 #define MIN_PLY_DEPTH_REMAINDER (MAX_PLY_DEPTH - __MIN_PLY_DEPTH)

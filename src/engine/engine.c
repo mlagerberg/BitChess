@@ -366,6 +366,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		}
 	}
 
+	// Check if we've won/lost.
 	bool at_check = v_king_at_check(board, color);
 	Move *moves = Move_alloc();
 	v_get_all_valid_moves_for_color(&moves, board, color);
@@ -374,10 +375,10 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		if (at_check) {
 			// Mate!
 			if (color == WHITE) {
-				result[0] = MIN_FITNESS;
+				result[0] = MAX_FITNESS;
 				result[1] = WHITE_WINS;
 			} else {
-				result[0] = MAX_FITNESS;
+				result[0] = MIN_FITNESS;
 				result[1] = BLACK_WINS;
 			}
 		} else {
