@@ -295,8 +295,9 @@ int Fitness_calculate(Board *board) {
 					Fitness_debug(i, j, piece, "king - more pawns near", more_pawns, 0);
 					#endif
 				}
-				if (pawns > 1) {
-					bonus = min(bonus, 0);
+				if (pawns > 1 && bonus != 0) {
+					// We still hand out a penalty, but no bonus. Hence the min/max
+					bonus = (piece->color == BLACK ? max(bonus, 0) : min(bonus, 0));
 					#ifdef PRINT_EVAL
 					Fitness_debug(i, j, piece, "  no bonus because enemy pawns are near", bonus, 0);
 					#endif
