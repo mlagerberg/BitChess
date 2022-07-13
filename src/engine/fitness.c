@@ -139,16 +139,22 @@ int Fitness_calculate(Board *board) {
 					Fitness_debug(i, j, piece, "  doubled\t", piece->color * DOUBLE_PAWN_PENALTY, result);
 					#endif
 				}
-				// Check for e and d pawns being blocked by opponent
-				if ((i == 3 || i == 4) && j == (piece->color == BLACK ? 4 : 3)) {
-					result += piece->color * E_AND_D_PENALTY;
-					#ifdef PRINT_EVAL
-					Fitness_debug(i, j, piece, "  e&d\t", piece->color * E_AND_D_PENALTY, result);
-					#endif
-					if (Board_is_color(board, i, j - piece->color, -piece->color)) {
+				// Check for e and d pawns being blocked by self or opponent
+				if (i == 3 || i == 4) {
+					int one_ahead = max(0, min(7, j - piece->color));
+					if (Board_is_empty(board, i, one_ahead)) {
+						#ifdef PRINT_EVAL
+						Fitness_debug(i, j, piece, "  E/D, can progress", 0, result);
+						#endif
+					} else if (Board_is_color(board, i, one_ahead, piece->color)) {
+						result += piece->color * E_AND_D_PENALTY;
+						#ifdef PRINT_EVAL
+						Fitness_debug(i, j, piece, "  E/D blocked by self", piece->color * E_AND_D_PENALTY, result);
+						#endif
+					} else {
 						result += piece->color * E_AND_D_BLOCKEDPENALTY;
 						#ifdef PRINT_EVAL
-						Fitness_debug(i, j, piece, "  e&d blocked", piece->color * E_AND_D_BLOCKEDPENALTY, result);
+						Fitness_debug(i, j, piece, "  E/D blocked by enemy", piece->color * E_AND_D_BLOCKEDPENALTY, result);
 						#endif
 					}
 				}
@@ -277,7 +283,7 @@ int Fitness_calculate(Board *board) {
 				Fitness_debug(i, j, piece, "king - game progress (.5x headcount)", progress, 0);
 				Fitness_debug(i, j, piece, "king - center distance", (int) distance, 0);
 				Fitness_debug(i, j, piece, "king - resulting bonus", bonus, 0);
-				Fitness_debug(i, j, piece, "king - pawns near", i, 0);
+				Fitness_debug(i, j, piece, "king - pawns near\t", i, 0);
 				#endif
 				if (i > 0) {
 					// Enemy pawns in one file to the left of the king
