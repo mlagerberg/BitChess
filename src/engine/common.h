@@ -49,13 +49,13 @@
 	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
 #else
-	#define __MIN_PLY_DEPTH (2)
-	#define MAX_PLY_DEPTH (2)
+	#define __MIN_PLY_DEPTH (1)
+	#define MAX_PLY_DEPTH (1)
 	#define MAX_EXTRA_PLY_DEPTH (0)
 	// Prints the reasoning behind evaluation
 	//#define PRINT_EVAL (1)
 	// Prints all moves at root level
-	//#define PRINT_MOVES (1)
+	#define PRINT_MOVES (1)
 	// Prints the entire thinking tree
 	//#define PRINT_ALL_MOVES (1)
 	// Prints a few moves, that are being considered

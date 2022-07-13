@@ -257,22 +257,15 @@ void *evaluate_moves(void *threadarg) {
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
 		Move *move = data->head[i];
-		#ifdef PRINT_MOVES
-			printf("\n[%d-%d:%d] %s%c%d-%c%d%s\n",
-				data->from, data->to, i,
-				white ? color_white : color_black,
-				move->x + 'a', 8 - move->y,
-				move->xx + 'a', 8 - move->yy,
-				resetcolor);
-		#else
-			#ifdef PRINT_ALL_MOVES
-			printf("\n");
-			Move_print_color(move, data->color);
-			printf(" >");
-			#endif
-		#endif
 		// Perform the move
 		UndoableMove *umove = Board_do_move(data->board, move);
+
+		#ifdef PRINT_ALL_MOVES
+		printf("\n");
+		Move_print_color(move, data->color);
+		printf(" >");
+		#endif
+
 		// Recurse!
 		int * ab = alpha_beta(
 				data->board,
@@ -283,13 +276,18 @@ void *evaluate_moves(void *threadarg) {
 				alpha, beta,
 				-data->color,
 				killers);
-
 		move->fitness = ab[0];
 		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
 			move->gives_check_mate = true;
 		} else if (ab[1] == STALE_MATE) {
 			move->gives_draw = true;
 		}
+
+		#ifdef PRINT_MOVES
+			printf("\n[%d-%d:%d] ", data->from, data->to, i);
+			Move_print_color(move, data->color);
+			printf(", evaluation: %d", move->fitness);
+		#endif
 
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
