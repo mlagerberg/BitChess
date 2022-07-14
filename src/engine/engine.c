@@ -438,10 +438,14 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		if (color == WHITE) {
 			#ifndef DISABLE_ALPHA_BETA
 			if (move->fitness >= beta) {
-				//printf("%s*%s", red, resetcolor);
-				printf(" %s β (%s%d >= %d%s)%s", red, resetcolor, move->fitness, beta, red, resetcolor);
 				Heuristics_produced_cutoff(killers, dist, move);
-				break;
+				#ifdef PRINT_ALL_MOVES
+					printf(" %s(%s%d >= %sβ%s: %d%s)%s", red, resetcolor, move->fitness, red, resetcolor, beta, red, resetcolor);
+					printf(" returning %sβ%s", red, resetcolor);
+				#endif
+				result[0] = beta;
+				result[1] = UNFINISHED;
+				return result;
 			}
 			#endif
 			if (move->fitness > alpha) {
@@ -451,10 +455,14 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		} else {
 			#ifndef DISABLE_ALPHA_BETA
 			if (move->fitness <= alpha) {
-				//printf("%s*%s", red, resetcolor);
-				printf(" %s α (%s%d <= %d%s)%s", red, resetcolor, move->fitness, alpha, red, resetcolor);
 				Heuristics_produced_cutoff(killers, dist, move);
-				break;
+				#ifdef PRINT_ALL_MOVES
+					printf(" %s(%s%d <= %sα%s: %d%s)%s", red, resetcolor, move->fitness, red, resetcolor, alpha, red, resetcolor);
+					printf(" returning %sα%s", red, resetcolor);
+				#endif
+				result[0] = alpha;
+				result[1] = UNFINISHED;
+				return result;
 			}
 			#endif
 			if (move->fitness < beta) {
