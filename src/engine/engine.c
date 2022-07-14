@@ -266,7 +266,7 @@ void *evaluate_moves(void *threadarg) {
 		#ifdef PRINT_ALL_MOVES
 		printf("\n");
 		Move_print_color(move, data->color);
-		printf(" -> %s(α%s = %d, %sβ%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
+		printf(" -> %s(α%s: %d, %sβ%s: %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
 		#endif
 
 		// Recurse!
@@ -326,20 +326,18 @@ void *evaluate_moves(void *threadarg) {
 
 		// Check for alpha/beta cut-offs
 		if (white) {
-			/* if (move->fitness >= beta) {
-				printf("%d >= %d, would-be root-level cutoff point\n", move->fitness, beta);
-				break;
-			} */
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
+				#ifdef PRINT_ALL_MOVES
+					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
+				#endif
 			}
 		} else {
-			/* if (move->fitness <= alpha) {
-				printf("%d <= %d, would-be root-level cutoff point\n", move->fitness, beta);
-				break;
-			} */
 			if (move->fitness < beta) {
 				beta = move->fitness;
+				#ifdef PRINT_ALL_MOVES
+					printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
+				#endif
 			}
 		}
 	}
@@ -398,7 +396,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		#ifdef PRINT_ALL_MOVES
 			print_depth(depth);
 			Move_print_color(move, color);
-			printf(" ->");
+			printf(": ");
 		#endif
 
 		UndoableMove *umove = Board_do_move(board, move);
@@ -475,14 +473,19 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 
 	Move_destroy(moves);
 	if (color == WHITE) {
+		#ifdef PRINT_ALL_MOVES
+			printf(" returning %sα%s: %d", red, resetcolor, alpha);
+		#endif
 		result[0] = alpha;
 	} else {
+		#ifdef PRINT_ALL_MOVES
+			printf(" returning %sβ%s: %d", red, resetcolor, beta);
+		#endif
 		result[0] = beta;
 	}
 	result[1] = UNFINISHED;
 	return result;
 }
-
 
 static void create_shuffled_array(Move **arr, Move *head, int total) {
 	Move *curr = head;
