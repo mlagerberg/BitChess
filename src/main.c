@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 		show_board(!algebraic);
 	} else if (strcmp("-e", argv[index]) == 0 || strcmp("evaluate", argv[index]) == 0) {
 		// Print board position value.
-		evaluate();
+		evaluate(verbosity);
 	} else if (strcmp("list", argv[index]) == 0) {
 		// Print a list of available moves:
 		show_moves(false);
@@ -466,7 +466,7 @@ void show_board(int simple) {
 
 // Evaluates the current board position, e.g. for generating
 // an opening book.
-int evaluate() {
+int evaluate(int verbosity) {
 	if (!has_game(false)) {
 		exit(1);
 	}
@@ -474,11 +474,14 @@ int evaluate() {
 	// Using OPENING_BOOK_MAX_PLY_DEPTH for the search depth here,
 	// because this method is meant to be used for generating
 	// opening books.
-	//Stats stats = {0, 0, 0};
-	//Move *move = Engine_turn(board, &stats, Board_turn(board), OPENING_BOOK_MAX_PLY_DEPTH, 0);
-	//Move_destroy(move);
+	Stats stats = {0, 0, 0};
+	if (verbosity != 0) {
+		printf("Evaluating %d half-moves deep", OPENING_BOOK_MAX_PLY_DEPTH);
+	}
+	Move *move = Engine_turn(board, &stats, Board_turn(board), OPENING_BOOK_MAX_PLY_DEPTH, verbosity);
+	Move_destroy(move);
 	int value = Board_evaluate(board);
-	printf("%d\n",value);
+	printf(" %d\n",value);
 	Board_destroy(board);
 	return value;
 }

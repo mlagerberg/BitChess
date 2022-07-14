@@ -81,7 +81,7 @@
 // Max ply depth used when calculating for the opening book
 // Minimum ply depth will be OPENING_BOOK_MAX_PLY_DEPTH - MIN_PLY_DEPTH_REMAINDER
 // Not used at the moment.
-//#define OPENING_BOOK_MAX_PLY_DEPTH (6)
+#define OPENING_BOOK_MAX_PLY_DEPTH (5)
 // If a branch of moves has a quiescence score that is above the threshold,
 // it won't be branched at the minimum ply depth. 
 #define QUIESCENCE_THRESHOLD (100)
