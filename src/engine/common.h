@@ -49,8 +49,8 @@
 	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
 #else
-	#define __MIN_PLY_DEPTH (2)
-	#define MAX_PLY_DEPTH (2)
+	#define __MIN_PLY_DEPTH (3)
+	#define MAX_PLY_DEPTH (3)
 	#define MAX_EXTRA_PLY_DEPTH (0)
 	// Prints the reasoning behind evaluation
 	//#define PRINT_EVAL (1)

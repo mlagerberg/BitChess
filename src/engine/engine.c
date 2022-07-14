@@ -248,11 +248,11 @@ void *evaluate_moves(void *threadarg) {
 	unsigned int killers[MAX_PLY_DEPTH + MAX_EXTRA_PLY_DEPTH] = { 0 };
 
 	#ifdef PRINT_THINKING
-	int best_fitness = white ? MIN_FITNESS : MAX_FITNESS;
+		int best_fitness = white ? MIN_FITNESS : MAX_FITNESS;
 	#endif
 
 	#ifdef PRINT_MOVES
-	printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
+		printf("Evaluating chunk from %d to %d of these moves:\n", data->from, data->to);
 	#endif
 
 	int alpha = MIN_FITNESS;
@@ -264,9 +264,9 @@ void *evaluate_moves(void *threadarg) {
 		UndoableMove *umove = Board_do_move(data->board, move);
 
 		#ifdef PRINT_ALL_MOVES
-		printf("\n");
-		Move_print_color(move, data->color);
-		printf(" -> %s(α%s: %d, %sβ%s: %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
+			printf("\n");
+			Move_print_color(move, data->color);
+			printf(" -> %s(α%s: %d, %sβ%s: %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
 		#endif
 
 		// Recurse!
@@ -448,7 +448,9 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			#endif
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
-				printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
+				#ifdef PRINT_ALL_MOVES
+					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
+				#endif
 			}
 		} else {
 			#ifndef DISABLE_ALPHA_BETA
@@ -465,7 +467,9 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			#endif
 			if (move->fitness < beta) {
 				beta = move->fitness;
+				#ifdef PRINT_ALL_MOVES
 				printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
+				#endif
 			}
 		}
 		move = move->next_sibling;
