@@ -326,26 +326,25 @@ void *evaluate_moves(void *threadarg) {
 
 		// Check for alpha/beta cut-offs
 		if (white) {
+			if (move->fitness >= beta) {
+				printf("%d >= %d, cutoff point\n", alpha, beta);
+				//break;
+			}
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
 			}
-			if (alpha >= beta) {
+		} else {
+			if (move->fitness <= alpha) {
 				printf("%d >= %d, cutoff point\n", alpha, beta);
 				//break;
 			}
-		} else {
 			if (move->fitness < beta) {
 				beta = move->fitness;
-			}
-			if (alpha >= beta) {
-				printf("%d >= %d, cutoff point\n", alpha, beta);
-				//break;
 			}
 		}
 	}
 	return NULL;
 }
-
 
 static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
 	static int result[2];
@@ -394,16 +393,18 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 
 	// Important not to count too old events:
 	quiescence_score /= 2;
-	Move *curr = moves;
-	while (curr) {
+	Move *move = moves;
+	while (move) {
 		#ifdef PRINT_ALL_MOVES
 			print_depth(depth);
-			Move_print_color(curr, color);
+			Move_print_color(move, color);
 			printf(" >");
 		#endif
 
-		UndoableMove *umove = Board_do_move(board, curr);
+		UndoableMove *umove = Board_do_move(board, move);
 		int score = Move_quiescence(umove, board);
+
+		// Recurse!
 		int * ab = alpha_beta(
 				board,
 				stats,
@@ -415,20 +416,19 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 				beta,
 				-color,
 				killers);
+		move->fitness = ab[0];
 		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
-			curr->gives_check_mate = true;
+			move->gives_check_mate = true;
 		} else if (ab[1] == STALE_MATE) {
-			curr->gives_draw = true;
+			move->gives_draw = true;
 		}
-		int result = ab[0];
 		Board_undo_move(board, umove);
 		Undo_destroy(umove);
 		#ifdef PRINT_ALL_MOVES
 			if (depth > 1) {
 				print_depth(depth);
-				curr->fitness = result;
-				Move_print_color(curr, color);
-				printf(" %s< %d%s", color==WHITE ? color_white : color_black, result, resetcolor);
+				Move_print_color(move, color);
+				printf(" %s< %d%s", color==WHITE ? color_white : color_black, fitness, resetcolor);
 			}
 		#endif
 
@@ -436,25 +436,25 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		// Breaking out of the loop if a certain minimum value
 		// of a branch is already higher than the maximum of another
 		if (color == WHITE) {
-			if (result > alpha) {
-				alpha = result;
-			}
-			if (alpha >= beta) {
-				//printf("%s*%s", red, resetcolor);
-				Heuristics_produced_cutoff(killers, dist, curr);
+			if (move->fitness >= beta) {
+				printf("%s*%s", red, resetcolor);
+				Heuristics_produced_cutoff(killers, dist, move);
 				break;
+			}
+			if (move->fitness > alpha) {
+				alpha = move->fitness;
 			}
 		} else {
-			if (result < beta) {
-				beta = result;
-			}
-			if (alpha >= beta) {
-				//printf("%s*%s", red, resetcolor);
-				Heuristics_produced_cutoff(killers, dist, curr);
+			if (move->fitness <= alpha) {
+				printf("%s*%s", red, resetcolor);
+				Heuristics_produced_cutoff(killers, dist, move);
 				break;
 			}
+			if (move->fitness < beta) {
+				beta = move->fitness;
+			}
 		}
-		curr = curr->next_sibling;
+		move = move->next_sibling;
 	}
 
 	Move_destroy(moves);
