@@ -55,12 +55,15 @@ static void print_depth(int depth) {
  * Returns the best move from the given list of moves. The given list
  * of moves <strong>must be usable as an array</strong>, like so:
  * 	head[0]->fitness = 0; head[1]->fitness = 0; // etc.
- * <strong>So a list of individual moves linkes together by their ->next_sibling is NOT ok.</strong>
+ * <strong>So a list of individual moves linked together by their ->next_sibling is NOT ok.</strong>
  * The length of the list must be specified in the last parameter.
  * 
  * The list of moves is send in chunks to evaluate_moves after which the
  * move with best value is picked (or randomly one of the moves within 10% 'distance'
  * from the best move).
+ * 
+ * If multithreading is disabled this method straight up just calls
+ * evaluate_moves with all the parameters wrapped in a ThreadData object.
  */
 static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth, Move **head, int total);
 
@@ -119,6 +122,9 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	draw_progress = verbosity != 0;
 	if (verbosity >= 2) {
 		printf("Thinking");
+		#ifdef PRINT_THINKING
+		printf("\n");
+		#endif
 	}
 	// Init randomizer:
 	srand(time(NULL));
@@ -253,22 +259,16 @@ void *evaluate_moves(void *threadarg) {
 	int beta = MAX_FITNESS;
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
-		#ifdef PRINT_MOVES
-			printf("\n[%d-%d:%d] %s%c%d-%c%d%s\n",
-				data->from, data->to, i,
-				white ? color_white : color_black,
-				data->head[i]->x + 'a', 8 - data->head[i]->y,
-				data->head[i]->xx + 'a', 8 - data->head[i]->yy,
-				resetcolor);
-		#else
-			#ifdef PRINT_ALL_MOVES
-			printf("\n");
-			Move_print_color(data->head[i], data->color);
-			printf(" >");
-			#endif
-		#endif
+		Move *move = data->head[i];
 		// Perform the move
-		UndoableMove *umove = Board_do_move(data->board, data->head[i]);
+		UndoableMove *umove = Board_do_move(data->board, move);
+
+		#ifdef PRINT_ALL_MOVES
+		printf("\n");
+		Move_print_color(move, data->color);
+		printf(" >");
+		#endif
+
 		// Recurse!
 		int * ab = alpha_beta(
 				data->board,
@@ -279,26 +279,39 @@ void *evaluate_moves(void *threadarg) {
 				alpha, beta,
 				-data->color,
 				killers);
-		int result = ab[0];
+		move->fitness = ab[0];
 		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
-			data->head[i]->gives_check_mate = true;
+			move->gives_check_mate = true;
 		} else if (ab[1] == STALE_MATE) {
-			data->head[i]->gives_draw = true;
+			move->gives_draw = true;
 		}
+
+		#ifdef PRINT_MOVES
+			printf("[%d-%d:%d] ", data->from, data->to, i);
+			Move_print_color(move, data->color);
+			printf(", evaluation: %d", move->fitness);
+			printf("\n");
+		#endif
 
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
-			Move_print_color(data->head[i], data->color);
-			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);
+			Move_print_color(move, data->color);
+			printf(" %s< %d%s", white ? color_white : color_black, move->fitness, resetcolor);
 		#endif
 
-		// Restore the board
-		Board_undo_move(data->board, umove);
 		#ifdef PRINT_THINKING
-			if ((white && data->head[i]->fitness > best_fitness) || (!white && data->head[i]->fitness < best_fitness)) {
-				best_fitness = data->head[i]->fitness;
+			// if (white) {
+			// 	printf("Is fitness %d > %d for ", move->fitness, best_fitness);
+			// } else {
+			// 	printf("Is fitness %d < %d for ", move->fitness, best_fitness);
+			// }
+			// Move_print(move);
+			// printf("\n");
+			if ((white && move->fitness > best_fitness) || (!white && move->fitness < best_fitness)) {
 				printf("  Considering ");
-				Move_print(data->head[i]);
+				Move_print_color(move, data->color);
+				printf(", evaluation: %d beats %d\n", move->fitness, best_fitness);
+				best_fitness = move->fitness;
 			}
 		#else
 			if (draw_progress) {
@@ -306,23 +319,27 @@ void *evaluate_moves(void *threadarg) {
 				fflush(stdout);
 			}
 		#endif
+
+		// Restore the board
+		Board_undo_move(data->board, umove);
 		Undo_destroy(umove);
 
 		// Check for alpha/beta cut-offs
-		data->head[i]->fitness = result;
 		if (white) {
-			if (result > alpha) {
-				alpha = result;
+			if (move->fitness > alpha) {
+				alpha = move->fitness;
 			}
 			if (alpha >= beta) {
-				break;
+				printf("%d >= %d, cutoff point\n", alpha, beta);
+				//break;
 			}
 		} else {
-			if (result < beta) {
-				beta = result;
+			if (move->fitness < beta) {
+				beta = move->fitness;
 			}
 			if (alpha >= beta) {
-				break;
+				printf("%d >= %d, cutoff point\n", alpha, beta);
+				//break;
 			}
 		}
 	}
@@ -332,8 +349,31 @@ void *evaluate_moves(void *threadarg) {
 
 static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
 	static int result[2];
-
 	stats->moves_count++;
+
+	// Check if we've won/lost.
+	bool at_check = v_king_at_check(board, color);
+	Move *moves = Move_alloc();
+	v_get_all_valid_moves_for_color(&moves, board, color);
+	if (moves == NULL || Move_is_nullmove(moves)) {
+		Move_destroy(moves);
+		if (at_check) {
+			// Mate!
+			if (color == WHITE) {
+				result[0] = MAX_FITNESS;
+				result[1] = WHITE_WINS;
+			} else {
+				result[0] = MIN_FITNESS;
+				result[1] = BLACK_WINS;
+			}
+		} else {
+			// Stalemate!
+			result[0] = 0;
+			result[1] = STALE_MATE;
+		}
+		return result;
+	}
+
 	// Stop when at maximum search depth
 	if (depth + extra_depth <= MIN_PLY_DEPTH_REMAINDER) {
 		// No need to go beyond MIN_PLY_DEPTH if move is 'quiet':
@@ -347,28 +387,6 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			#endif
 			return result;
 		}
-	}
-
-	bool at_check = v_king_at_check(board, color);
-	Move *moves = Move_alloc();
-	v_get_all_valid_moves_for_color(&moves, board, color);
-	if (moves == NULL || Move_is_nullmove(moves)) {
-		Move_destroy(moves);
-		if (at_check) {
-			// Mate!
-			if (color == WHITE) {
-				result[0] = MIN_FITNESS;
-				result[1] = WHITE_WINS;
-			} else {
-				result[0] = MAX_FITNESS;
-				result[1] = BLACK_WINS;
-			}
-		} else {
-			// Stalemate!
-			result[0] = 0;
-			result[1] = STALE_MATE;
-		}
-		return result;
 	}
 
 	// Sort the killer move to the front
