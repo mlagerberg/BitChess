@@ -177,7 +177,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 
 // preprocessor toggle instead of if-statement because this code block
 // contains code that Windows doesn't support.
-#ifdef THREADS 
+#ifdef THREADS
  	else {
 		// Divide array in chunks and evaluate moves in parallel.
 		int chunks = min(threads, max(1, total/2));
@@ -209,7 +209,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 	    }
 	    // Combine statistics
 	    for (i = 0; i < chunks; i++) {
-	        stats->moves_count += data[i].stats->moves_count;        
+	        stats->moves_count += data[i].stats->moves_count;
 	        stats->boards_evaluated += data[i].stats->boards_evaluated;
 	        // Board_destroy destroys the pieces as well, so:
 	        Board_destroy(data[i].board);
@@ -289,7 +289,7 @@ void *evaluate_moves(void *threadarg) {
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
 			Move_print_color(data->head[i], data->color);
-			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);			
+			printf(" %s< %d%s", white ? color_white : color_black, result, resetcolor);
 		#endif
 
 		// Restore the board
