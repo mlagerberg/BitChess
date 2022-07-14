@@ -266,7 +266,7 @@ void *evaluate_moves(void *threadarg) {
 		#ifdef PRINT_ALL_MOVES
 		printf("\n");
 		Move_print_color(move, data->color);
-		printf(" >");
+		printf(" -> %s(α%s = %d, %sβ%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
 		#endif
 
 		// Recurse!
@@ -296,7 +296,7 @@ void *evaluate_moves(void *threadarg) {
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
 			Move_print_color(move, data->color);
-			printf(" %s< %d%s", white ? color_white : color_black, move->fitness, resetcolor);
+			printf(" %s<- %d%s", white ? color_white : color_black, move->fitness, resetcolor);
 		#endif
 
 		#ifdef PRINT_THINKING
@@ -326,18 +326,18 @@ void *evaluate_moves(void *threadarg) {
 
 		// Check for alpha/beta cut-offs
 		if (white) {
-			if (move->fitness >= beta) {
-				printf("%d >= %d, cutoff point\n", alpha, beta);
-				//break;
-			}
+			/* if (move->fitness >= beta) {
+				printf("%d >= %d, would-be root-level cutoff point\n", move->fitness, beta);
+				break;
+			} */
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
 			}
 		} else {
-			if (move->fitness <= alpha) {
-				printf("%d >= %d, cutoff point\n", alpha, beta);
-				//break;
-			}
+			/* if (move->fitness <= alpha) {
+				printf("%d <= %d, would-be root-level cutoff point\n", move->fitness, beta);
+				break;
+			} */
 			if (move->fitness < beta) {
 				beta = move->fitness;
 			}
@@ -398,7 +398,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		#ifdef PRINT_ALL_MOVES
 			print_depth(depth);
 			Move_print_color(move, color);
-			printf(" >");
+			printf(" ->");
 		#endif
 
 		UndoableMove *umove = Board_do_move(board, move);
@@ -428,7 +428,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			if (depth > 1) {
 				print_depth(depth);
 				Move_print_color(move, color);
-				printf(" %s< %d%s", color==WHITE ? color_white : color_black, fitness, resetcolor);
+				printf(" %s<- %d%s", color==WHITE ? color_white : color_black, move->fitness, resetcolor);
 			}
 		#endif
 
@@ -436,22 +436,30 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		// Breaking out of the loop if a certain minimum value
 		// of a branch is already higher than the maximum of another
 		if (color == WHITE) {
+			#ifndef DISABLE_ALPHA_BETA
 			if (move->fitness >= beta) {
-				printf("%s*%s", red, resetcolor);
+				//printf("%s*%s", red, resetcolor);
+				printf(" %s β (%s%d >= %d%s)%s", red, resetcolor, move->fitness, beta, red, resetcolor);
 				Heuristics_produced_cutoff(killers, dist, move);
 				break;
 			}
+			#endif
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
+				printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
 			}
 		} else {
+			#ifndef DISABLE_ALPHA_BETA
 			if (move->fitness <= alpha) {
-				printf("%s*%s", red, resetcolor);
+				//printf("%s*%s", red, resetcolor);
+				printf(" %s α (%s%d <= %d%s)%s", red, resetcolor, move->fitness, alpha, red, resetcolor);
 				Heuristics_produced_cutoff(killers, dist, move);
 				break;
 			}
+			#endif
 			if (move->fitness < beta) {
 				beta = move->fitness;
+				printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
 			}
 		}
 		move = move->next_sibling;

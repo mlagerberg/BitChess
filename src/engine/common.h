@@ -55,15 +55,19 @@
 	// Prints the reasoning behind evaluation
 	//#define PRINT_EVAL (1)
 	// Prints all moves at root level
-	#define PRINT_MOVES (1)
-	// Prints the entire thinking tree
-	//#define PRINT_ALL_MOVES (1)
+	//#define PRINT_MOVES (1)
+	// Prints the entire thinking tree.
+	// Disable PRINT_MOVES when you use this instead.
+	#define PRINT_ALL_MOVES (1)
 	// Prints a few moves, that are being considered
-	#define PRINT_THINKING (1)
+	//#define PRINT_THINKING (1)
 	// Shuffling add randomization (different alpha-beta cutoffs) while
 	// not impacting quality. Keeping them sorted helps with consistent
 	// debugging.
 	#define DEBUG_KEEP_MOVES_SORTED (1)
+	// Only for some serious testing: this disables alpha-beta cutoffs
+	// entirely, causing a much larger search space
+	//#define DISABLE_ALPHA_BETA (1)
 	// Disable multithreading
  	#undef THREADS
 #endif
