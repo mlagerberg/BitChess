@@ -4,7 +4,7 @@
 #                 smaller search tree and more verbose logging.
 # `make test`	  builds the app and runs it's tests.
 # `make clean`	  removes executable file and src/gitversion.c.
-# `make install`  installs the executable into /usr/local/bin
+# `make install`  installs the executable into ~/bin
 #
 
 # C compiler
@@ -70,4 +70,4 @@ test: executable
 	./$(TARGET) test
 
 install:
-	cp ./$(TARGET) /usr/local/bin
+	cp ./$(TARGET) ~/bin
