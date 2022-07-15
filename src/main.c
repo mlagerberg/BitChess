@@ -116,6 +116,15 @@ int main(int argc, char *argv[]) {
 			usage();
 			return 1;
 		}
+	} else if (strcmp("-sx", argv[1]) == 0 || strcmp("-xs", argv[1]) == 0) {
+		// -s and -x combined
+		verbosity = 0;
+		no_counter = 1;
+		index = 2;
+		if (argc != 3) {
+			usage();
+			return 1;
+		}
 	} else {
 		// Default to max verbosity.
 		verbosity = 2;
