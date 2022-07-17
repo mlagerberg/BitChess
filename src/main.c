@@ -488,9 +488,9 @@ int evaluate(int verbosity) {
 		printf("Evaluating %d half-moves deep", OPENING_BOOK_MAX_PLY_DEPTH);
 	}
 	Move *move = Engine_turn(board, &stats, Board_turn(board), OPENING_BOOK_MAX_PLY_DEPTH, verbosity);
-	Move_destroy(move);
-	int value = Board_evaluate(board);
+	int value = move->fitness;
 	printf(" %d\n",value);
+	Move_destroy(move);
 	Board_destroy(board);
 	return value;
 }
