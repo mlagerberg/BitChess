@@ -393,6 +393,7 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 			#ifdef PRINT_ALL_MOVES
 				printf(" %s%d%s", WHITE ? color_white : color_black, result->fitness, resetcolor);
 			#endif
+			Move_destroy(moves);
 			return result;
 		}
 	}
