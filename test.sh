@@ -7,4 +7,6 @@
 
 cp testgames/test3 ~/.BitChess/game
 make debug
-./chess swap
+status=$?
+
+[ $status -eq 0 ] && ./chess swap

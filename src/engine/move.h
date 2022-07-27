@@ -64,6 +64,8 @@ void Move_print_color(Move *m, int color);
 
 void Move_print_all(Move *head);
 
+void Move_print_tree(Move *head);
+
 /**
 * Compare values to another move.
 * When sorting, this'll sort in order of ascending move value.

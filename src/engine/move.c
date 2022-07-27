@@ -24,9 +24,11 @@ Move *Move_create(int color, int x, int y, int xx, int yy, int promotion) {
 	m->gives_draw = false;
 	m->gives_check_mate = false;
 	m->is_evasion = false;
+	m->state = 0;
 	m->promotion = promotion;
 	m->fitness = (color == WHITE ? MIN_FITNESS : MAX_FITNESS);
 	m->next_sibling = NULL;
+	m->next_child = NULL;
 	return m;
 }
 
@@ -39,6 +41,7 @@ Move *Move_clone(Move *move) {
 	clone->gives_draw = move->gives_draw;
 	clone->gives_check_mate = move->gives_check_mate;
 	clone->is_evasion = move->is_evasion;
+	clone->state = move->state;
 	return clone;
 }
 
@@ -92,6 +95,15 @@ void Move_print_all(Move *head) {
 	while(curr) {
 		printf("%c%d-%c%d, value: %d\n", curr->x + 'a', 8 - curr->y, curr->xx + 'a', 8 - curr->yy, curr->fitness);
 		curr = curr->next_sibling;
+	}
+}
+
+void Move_print_tree(Move *head) {
+	Move *curr;
+	curr = head;
+	while(curr) {
+		printf("%c%d-%c%d, \n", curr->x + 'a', 8 - curr->y, curr->xx + 'a', 8 - curr->yy);
+		curr = curr->next_child;
 	}
 }
 

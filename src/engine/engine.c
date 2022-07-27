@@ -94,11 +94,9 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
  * - color 		- current turn
  * - *killers	- array with pointers to killer moves.
  *
- * Returns an array: {fitness, state} where fitness is the eventual board position value
- * and state is either 1 if the move results directly in check mate, 2 if it directly
- * results in stale mate, and 0 otherwise.
+ * Returns a BestMove instance.
  */
-static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]);
+static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]);
 
 /**
  * Creates an array of pointers to the moves, so that
@@ -151,6 +149,8 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 			stats->boards_evaluated, stats->moves_count,
 			duration);
 	}
+	printf("Thought tree: ");
+	Move_print_tree(head);
 	// Make a copy, so the rest can easily be destroyed in 1 go:
 	Move *result = Move_clone(head);
 	Move_destroy(arr[0]);
@@ -270,7 +270,7 @@ void *evaluate_moves(void *threadarg) {
 		#endif
 
 		// Recurse!
-		int * ab = alpha_beta(
+		Move * ab = alpha_beta(
 				data->board,
 				data->stats,
 				1,
@@ -279,11 +279,22 @@ void *evaluate_moves(void *threadarg) {
 				alpha, beta,
 				-data->color,
 				killers);
-		move->fitness = ab[0];
-		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
-			move->gives_check_mate = true;
-		} else if (ab[1] == STALE_MATE) {
-			move->gives_draw = true;
+
+		// Remember results
+		move->fitness = ab->fitness;
+		// State should only be set if THIS move ends the game
+		// and not propagate all the way to root level.
+		// So we check what ab is: if it is from the deepest level, it will be
+		// a null move
+		if (ab == NULL || Move_is_nullmove(ab)) {
+			move->state = ab->state;
+			if (ab->state == WHITE_WINS || ab->state == BLACK_WINS) {
+				move->gives_check_mate = true;
+			} else if (ab->state == STALE_MATE) {
+				move->gives_draw = true;
+			}
+		} else {
+			move->next_child = ab;
 		}
 
 		#ifdef PRINT_MOVES
@@ -344,8 +355,8 @@ void *evaluate_moves(void *threadarg) {
 	return NULL;
 }
 
-static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
-	static int result[2];
+static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
+	Move *result = Move_alloc();
 	stats->moves_count++;
 
 	// Check if we've won/lost.
@@ -357,16 +368,16 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		if (at_check) {
 			// Mate!
 			if (color == WHITE) {
-				result[0] = MAX_FITNESS;
-				result[1] = WHITE_WINS;
+				result->fitness = MAX_FITNESS;
+				result->state = WHITE_WINS;
 			} else {
-				result[0] = MIN_FITNESS;
-				result[1] = BLACK_WINS;
+				result->fitness = MIN_FITNESS;
+				result->state = BLACK_WINS;
 			}
 		} else {
 			// Stalemate!
-			result[0] = 0;
-			result[1] = STALE_MATE;
+			result->fitness = 0;
+			result->state = STALE_MATE;
 		}
 		return result;
 	}
@@ -377,10 +388,10 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		bool allow_pruning = (quiescence_score < QUIESCENCE_THRESHOLD);
 		if (allow_pruning || depth + extra_depth <= 0) {
 			stats->boards_evaluated++;
-			result[0] = Board_evaluate(board);
-			result[1] = 0;
+			result->fitness = Board_evaluate(board);
+			result->state = UNFINISHED;
 			#ifdef PRINT_ALL_MOVES
-				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
+				printf(" %s%d%s", WHITE ? color_white : color_black, result->fitness, resetcolor);
 			#endif
 			return result;
 		}
@@ -403,7 +414,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		int score = Move_quiescence(umove, board);
 
 		// Recurse!
-		int * ab = alpha_beta(
+		Move * ab = alpha_beta(
 				board,
 				stats,
 				dist + 1,
@@ -414,12 +425,25 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 				beta,
 				-color,
 				killers);
-		move->fitness = ab[0];
-		if (ab[1] == WHITE_WINS || ab[1] == BLACK_WINS) {
-			move->gives_check_mate = true;
-		} else if (ab[1] == STALE_MATE) {
-			move->gives_draw = true;
+
+		// Remember results
+		move->fitness = ab->fitness;
+		// State should only be set if THIS move ends the game
+		// and not propagate all the way to root level.
+		// So we check what ab is: if it is from the deepest level, it will be
+		// a null move
+		if (ab == NULL || Move_is_nullmove(ab)) {
+			move->state = ab->state;
+			if (ab->state == WHITE_WINS || ab->state == BLACK_WINS) {
+				move->gives_check_mate = true;
+			} else if (ab->state == STALE_MATE) {
+				move->gives_draw = true;
+			}
+		} else {
+			move->next_child = ab;
 		}
+
+		// Undo so we can move on
 		Board_undo_move(board, umove);
 		Undo_destroy(umove);
 		#ifdef PRINT_ALL_MOVES
@@ -441,13 +465,18 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 					printf(" %s(%s%d >= %sβ%s: %d%s)%s", red, resetcolor, move->fitness, red, resetcolor, beta, red, resetcolor);
 					printf(" returning %sβ%s", red, resetcolor);
 				#endif
-				result[0] = beta;
-				result[1] = UNFINISHED;
+				result->fitness = beta;
+				result->state = UNFINISHED;
+				Move_destroy(result->next_child);
+				result->next_child = Move_clone(move);
+				Move_destroy(moves);
 				return result;
 			}
 			#endif
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
+				Move_destroy(result->next_child);
+				result->next_child = Move_clone(move);
 				#ifdef PRINT_ALL_MOVES
 					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
 				#endif
@@ -460,13 +489,18 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 					printf(" %s(%s%d <= %sα%s: %d%s)%s", red, resetcolor, move->fitness, red, resetcolor, alpha, red, resetcolor);
 					printf(" returning %sα%s", red, resetcolor);
 				#endif
-				result[0] = alpha;
-				result[1] = UNFINISHED;
+				result->fitness = alpha;
+				result->state = UNFINISHED;
+				Move_destroy(result->next_child);
+				result->next_child = Move_clone(move);
+				Move_destroy(moves);
 				return result;
 			}
 			#endif
 			if (move->fitness < beta) {
 				beta = move->fitness;
+				Move_destroy(result->next_child);
+				result->next_child = Move_clone(move);
 				#ifdef PRINT_ALL_MOVES
 				printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
 				#endif
@@ -480,14 +514,14 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 		#ifdef PRINT_ALL_MOVES
 			printf(" returning %sα%s: %d", red, resetcolor, alpha);
 		#endif
-		result[0] = alpha;
+		result->fitness = alpha;
 	} else {
 		#ifdef PRINT_ALL_MOVES
 			printf(" returning %sβ%s: %d", red, resetcolor, beta);
 		#endif
-		result[0] = beta;
+		result->fitness = beta;
 	}
-	result[1] = UNFINISHED;
+	result->state = UNFINISHED;
 	return result;
 }
 

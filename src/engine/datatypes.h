@@ -97,38 +97,38 @@ typedef struct Board {
 
 	Piece *fields[8][8];
 
-	/// Number of half-moves completed
+	//  Number of half-moves completed
 	uint8_t ply_count;
 
-	/// 50-move rule:
-	/// Number of half-moves played without capturing a piece or moving a pawn.
-	/// If 100 such half-moves are made, either player can declare a draw.
-	/// TODO this is not used yet
+	//  50-move rule:
+	//  Number of half-moves played without capturing a piece or moving a pawn.
+	//  If 100 such half-moves are made, either player can declare a draw.
+	//  TODO this is not used yet
 	uint8_t fifty_move_count;
 
-	/// Whether or not white is still allowed to perform castling on the king's side.
+	//  Whether or not white is still allowed to perform castling on the king's side.
 	bool white_can_castle_kings_side;
-	/// Whether or not white is still allowed to perform castling on the queen's side.
+	//  Whether or not white is still allowed to perform castling on the queen's side.
 	bool white_can_castle_queens_side;
-	/// Whether or not black is still allowed to perform castling on the king's side.
+	//  Whether or not black is still allowed to perform castling on the king's side.
 	bool black_can_castle_kings_side;
-	/// Whether or not black is still allowed to perform castling on the queen's side.
+	//  Whether or not black is still allowed to perform castling on the queen's side.
 	bool black_can_castle_queens_side;
-	/// Whether or not (and on which file) white is allowed to perform en passant.
+	//  Whether or not (and on which file) white is allowed to perform en passant.
 	uint8_t white_can_en_passant;
-	/// Whether or not (and on which file) black is allowed to perform en passant.
+	//  Whether or not (and on which file) black is allowed to perform en passant.
 	uint8_t black_can_en_passant;
 
-	/// White won, black won, ongoing, draw?
+	//  White won, black won, ongoing, draw?
 	uint8_t state;
 
-	/// Number of captured white pieces
+	//  Number of captured white pieces
 	uint8_t captures_white_count;
-	/// Number of captured black pieces
+	//  Number of captured black pieces
 	uint8_t captures_black_count;
-	/// The first of a list of captured white pieces (or NULL)
+	//  The first of a list of captured white pieces (or NULL)
 	Capture *captures_white;
-	/// The first of a list of captured black pieces (or NULL)
+	//  The first of a list of captured black pieces (or NULL)
 	Capture *captures_black;
 } Board;
 
@@ -137,24 +137,31 @@ typedef struct Board {
  * All properties of a move, including evaluation value.
  */
 typedef struct Move {
-	/// Source file and rank
+	// Source file and rank
 	uint8_t x, y;
-	/// Target file and rank
+	// Target file and rank
 	uint8_t xx, yy;
 	bool is_castling;
 	bool is_en_passant;
 	bool gives_check;
 	bool gives_draw;
 	bool gives_check_mate;
-	/// `true` if the player is at check before making this move.
+	// `true` if the player is at check before making this move.
 	bool is_evasion;
-	/// Only used when pawn reaches other side of the board, e.g. QUEEN or KNIGHT
+	// Only used when pawn reaches other side of the board, e.g. QUEEN or KNIGHT
 	uint8_t promotion;
-	/// Fitness value of the move. The higher the better for white, the lower the better for black.
+	// Fitness value of the move. The higher the better for white,
+	// the lower the better for black.
+	// When we have a search tree, this will hold the fitness value of the
+	// deepest child
 	int fitness;
-	/// When generating possible moves, this'll point to the next in line.
-	/// So, it does NOT point to the next (opponent's) move!
+	//  White won, black won, ongoing, draw?
+	uint8_t state;
+	// When generating possible moves, this'll point to the next in line.
+	// So, it does NOT point to the next (opponent's) move!
 	struct Move *next_sibling;
+	// When searching, the next child is the best counter move
+	struct Move *next_child;
 } Move;
 
 
