@@ -382,6 +382,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 			#ifdef PRINT_ALL_MOVES
 				printf(" %s%d%s", WHITE ? color_white : color_black, result[0], resetcolor);
 			#endif
+			Move_destroy(moves);
 			return result;
 		}
 	}
@@ -443,6 +444,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 				#endif
 				result[0] = beta;
 				result[1] = UNFINISHED;
+				Move_destroy(moves);
 				return result;
 			}
 			#endif
@@ -462,6 +464,7 @@ static int * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ext
 				#endif
 				result[0] = alpha;
 				result[1] = UNFINISHED;
+				Move_destroy(moves);
 				return result;
 			}
 			#endif
