@@ -60,7 +60,7 @@
 	// Disable PRINT_MOVES when you use this instead.
 	#define PRINT_ALL_MOVES (1)
 	// Prints a few moves, that are being considered
-	//#define PRINT_THINKING (1)
+	#define PRINT_THINKING (1)
 	// Shuffling add randomization (different alpha-beta cutoffs) while
 	// not impacting quality. Keeping them sorted helps with consistent
 	// debugging.

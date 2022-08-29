@@ -42,6 +42,10 @@ Move *Move_clone(Move *move) {
 	clone->gives_check_mate = move->gives_check_mate;
 	clone->is_evasion = move->is_evasion;
 	clone->state = move->state;
+	// NOT a deep clone of the child:
+	if (!Move_is_nullmove(move->next_child)) {
+		clone->next_child = Move_clone(move->next_child);		
+	}
 	return clone;
 }
 
@@ -102,7 +106,7 @@ void Move_print_tree(Move *head) {
 	Move *curr;
 	curr = head;
 	while(curr) {
-		printf("%c%d-%c%d, \n", curr->x + 'a', 8 - curr->y, curr->xx + 'a', 8 - curr->yy);
+		printf("%c%d-%c%d, ", curr->x + 'a', 8 - curr->y, curr->xx + 'a', 8 - curr->yy);
 		curr = curr->next_child;
 	}
 }

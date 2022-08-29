@@ -96,7 +96,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
  *
  * Returns a BestMove instance.
  */
-static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]);
+static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, Move *alpha_move, Move *beta_move, int color, unsigned int killers[]);
 
 /**
  * Creates an array of pointers to the moves, so that
@@ -151,6 +151,7 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 	}
 	printf("Thought tree: ");
 	Move_print_tree(head);
+	printf("evaluation: %d.\n", head->fitness);
 	// Make a copy, so the rest can easily be destroyed in 1 go:
 	Move *result = Move_clone(head);
 	Move_destroy(arr[0]);
@@ -238,7 +239,7 @@ static Move *get_best_move(Board *board, Stats *stats, int color, int ply_depth,
 /**
  * Root level of the search.
  * Engine_turn calls this function on a list of moves (by proxy of get_best_move,
- * which handles multithreading and picking the highest value from the evaluations.
+ * which handles multithreading and picking the highest value from the evaluations).
  * This method in turn calls alpha_beta for the next search depth.
  */
 void *evaluate_moves(void *threadarg) {
@@ -257,6 +258,8 @@ void *evaluate_moves(void *threadarg) {
 
 	int alpha = MIN_FITNESS;
 	int beta = MAX_FITNESS;
+	Move *alpha_move = NULL;
+	Move *beta_move = NULL;
 	// Try each move in the chunk
 	for (i = data->from; i < data->to; i++) {
 		Move *move = data->head[i];
@@ -265,7 +268,7 @@ void *evaluate_moves(void *threadarg) {
 
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
-			Move_print_color(move, data->color);
+			Move_print_tree(move);
 			printf(" -> %s(α%s: %d, %sβ%s: %d%s)%s", red, resetcolor, alpha, red, resetcolor, beta, red, resetcolor);
 		#endif
 
@@ -277,8 +280,14 @@ void *evaluate_moves(void *threadarg) {
 				data->ply_depth-1,
 				0, 0,
 				alpha, beta,
+				alpha_move, beta_move,
 				-data->color,
 				killers);
+		printf(" [RECEIVED ROOT (%d) ", Move_is_nullmove(ab->next_child));
+		if (!Move_is_nullmove(ab->next_child)) {
+			Move_print_tree(ab->next_child);
+		}
+		printf("] ");
 
 		// Remember results
 		move->fitness = ab->fitness;
@@ -286,7 +295,7 @@ void *evaluate_moves(void *threadarg) {
 		// and not propagate all the way to root level.
 		// So we check what ab is: if it is from the deepest level, it will be
 		// a null move
-		if (ab == NULL || Move_is_nullmove(ab)) {
+		if (ab->next_child == NULL || Move_is_nullmove(ab->next_child)) {
 			move->state = ab->state;
 			if (ab->state == WHITE_WINS || ab->state == BLACK_WINS) {
 				move->gives_check_mate = true;
@@ -294,19 +303,20 @@ void *evaluate_moves(void *threadarg) {
 				move->gives_draw = true;
 			}
 		} else {
-			move->next_child = ab;
+			move->next_child = ab->next_child;
 		}
 
 		#ifdef PRINT_MOVES
 			printf("[%d-%d:%d] ", data->from, data->to, i);
-			Move_print_color(move, data->color);
+			Move_print_tree(move);
 			printf(", evaluation: %d", move->fitness);
 			printf("\n");
 		#endif
 
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
-			Move_print_color(move, data->color);
+			Move_print_tree(move);
+			///Move_print_tree(ab);
 			printf(" %s<- %d%s", white ? color_white : color_black, move->fitness, resetcolor);
 		#endif
 
@@ -320,7 +330,7 @@ void *evaluate_moves(void *threadarg) {
 			// printf("\n");
 			if ((white && move->fitness > best_fitness) || (!white && move->fitness < best_fitness)) {
 				printf("  Considering ");
-				Move_print_color(move, data->color);
+				Move_print_tree(move);
 				printf(", evaluation: %d beats %d\n", move->fitness, best_fitness);
 				best_fitness = move->fitness;
 			}
@@ -339,6 +349,8 @@ void *evaluate_moves(void *threadarg) {
 		if (white) {
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
+				Move_destroy(alpha_move);
+				alpha_move = Move_clone(move);
 				#ifdef PRINT_ALL_MOVES
 					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
 				#endif
@@ -346,6 +358,8 @@ void *evaluate_moves(void *threadarg) {
 		} else {
 			if (move->fitness < beta) {
 				beta = move->fitness;
+				Move_destroy(beta_move);
+				beta_move = Move_clone(move);
 				#ifdef PRINT_ALL_MOVES
 					printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
 				#endif
@@ -355,7 +369,7 @@ void *evaluate_moves(void *threadarg) {
 	return NULL;
 }
 
-static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, int color, unsigned int killers[]) {
+static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int extra_depth, int quiescence_score, int alpha, int beta, Move *alpha_move, Move *beta_move, int color, unsigned int killers[]) {
 	Move *result = Move_alloc();
 	stats->moves_count++;
 
@@ -407,7 +421,7 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 	while (move) {
 		#ifdef PRINT_ALL_MOVES
 			print_depth(depth);
-			Move_print_color(move, color);
+			Move_print_tree(move);
 			printf(": ");
 		#endif
 
@@ -422,10 +436,15 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				depth - 1,
 				at_check && extra_depth < MAX_EXTRA_PLY_DEPTH ? extra_depth + 1 : extra_depth,
 				quiescence_score + score,
-				alpha,
-				beta,
+				alpha, beta,
+				alpha_move, beta_move,
 				-color,
 				killers);
+		printf(" [RECEIVED (%d) ", Move_is_nullmove(ab->next_child));
+		if (!Move_is_nullmove(ab->next_child)) {
+			Move_print_tree(ab->next_child);
+		}
+		printf("] ");
 
 		// Remember results
 		move->fitness = ab->fitness;
@@ -433,7 +452,7 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 		// and not propagate all the way to root level.
 		// So we check what ab is: if it is from the deepest level, it will be
 		// a null move
-		if (ab == NULL || Move_is_nullmove(ab)) {
+		if (ab->next_child == NULL || Move_is_nullmove(ab->next_child)) {
 			move->state = ab->state;
 			if (ab->state == WHITE_WINS || ab->state == BLACK_WINS) {
 				move->gives_check_mate = true;
@@ -441,7 +460,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				move->gives_draw = true;
 			}
 		} else {
-			move->next_child = ab;
+			move->next_child = Move_clone(ab->next_child);
+			move->fitness = ab->fitness;
+			move->gives_draw = ab->gives_draw;
+			move->gives_check = ab->gives_check;
+			move->gives_check_mate = ab->gives_check_mate;
 		}
 
 		// Undo so we can move on
@@ -450,7 +473,8 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 		#ifdef PRINT_ALL_MOVES
 			if (depth > 1) {
 				print_depth(depth);
-				Move_print_color(move, color);
+				// Move_print_color(move, color);
+				Move_print_tree(move);
 				printf(" %s<- %d%s", color==WHITE ? color_white : color_black, move->fitness, resetcolor);
 			}
 		#endif
@@ -470,6 +494,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				result->state = UNFINISHED;
 				Move_destroy(result->next_child);
 				result->next_child = Move_clone(move);
+				printf(" [RETURNING IT A (%d) ", Move_is_nullmove(result->next_child));
+				if (!Move_is_nullmove(result->next_child)) {
+					Move_print_tree(result->next_child);
+				}
+				printf("] ");
 				Move_destroy(moves);
 				return result;
 			}
@@ -477,7 +506,13 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 			if (move->fitness > alpha) {
 				alpha = move->fitness;
 				Move_destroy(result->next_child);
-				result->next_child = Move_clone(move);
+				alpha_move = Move_clone(move);
+				result->next_child = alpha_move;
+				printf(" [SETTING IT B (%d) ", Move_is_nullmove(result->next_child));
+				if (!Move_is_nullmove(result->next_child)) {
+					Move_print_tree(result->next_child);
+				}
+				printf("] ");
 				#ifdef PRINT_ALL_MOVES
 					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
 				#endif
@@ -494,6 +529,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				result->state = UNFINISHED;
 				Move_destroy(result->next_child);
 				result->next_child = Move_clone(move);
+				printf(" [RETURNING IT C (%d) ", Move_is_nullmove(result->next_child));
+				if (!Move_is_nullmove(result->next_child)) {
+					Move_print_tree(result->next_child);
+				}
+				printf("] ");
 				Move_destroy(moves);
 				return result;
 			}
@@ -501,7 +541,13 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 			if (move->fitness < beta) {
 				beta = move->fitness;
 				Move_destroy(result->next_child);
-				result->next_child = Move_clone(move);
+				beta_move = Move_clone(move);
+				result->next_child = beta_move;
+				// printf(" [SETTING IT D (%d) ", Move_is_nullmove(result->next_child));
+				// if (!Move_is_nullmove(result->next_child)) {
+				// 	Move_print_tree(result->next_child);
+				// }
+				// printf("] ");
 				#ifdef PRINT_ALL_MOVES
 				printf(" %s(β%s = %d%s)%s", red, resetcolor, beta, red, resetcolor);
 				#endif
@@ -515,14 +561,22 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 		#ifdef PRINT_ALL_MOVES
 			printf(" returning %sα%s: %d", red, resetcolor, alpha);
 		#endif
+		result->next_child = alpha_move;
 		result->fitness = alpha;
 	} else {
 		#ifdef PRINT_ALL_MOVES
 			printf(" returning %sβ%s: %d", red, resetcolor, beta);
 		#endif
+		result->next_child = beta_move;
 		result->fitness = beta;
 	}
 	result->state = UNFINISHED;
+	printf(" [RETURNING IT F (%d) ", Move_is_nullmove(result->next_child));
+	if (!Move_is_nullmove(result->next_child)) {
+		Move_print_tree(result->next_child);
+	}
+	printf("] ");
+	printf("Returning result with %d or %d as child\n", result->next_child == NULL, Move_is_nullmove(result->next_child));
 	return result;
 }
 

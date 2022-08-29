@@ -5,6 +5,7 @@
 # Helpful when quickly testing changes in the engine
 # on a consistent game.
 
+clear
 cp testgames/test3 ~/.BitChess/game
 make debug
 status=$?
