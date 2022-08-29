@@ -36,3 +36,5 @@ notes.txt
 test.chess
 .DS_Store
 *.swp
+.vscode/
+*.code-workspace
