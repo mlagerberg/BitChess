@@ -149,9 +149,13 @@ Move *Engine_turn(Board *board, Stats *stats, int color, int ply_depth, int verb
 			stats->boards_evaluated, stats->moves_count,
 			duration);
 	}
-	printf("Thought tree: ");
-	Move_print_tree(head);
-	printf("evaluation: %d.\n", head->fitness);
+
+	#ifdef PRINT_TREE
+		printf("Thought tree: ");
+		Move_print_tree(head);
+		printf("evaluation: %d.\n\n", head->fitness);
+	#endif
+
 	// Make a copy, so the rest can easily be destroyed in 1 go:
 	Move *result = Move_clone(head);
 	Move_destroy(arr[0]);
@@ -283,11 +287,11 @@ void *evaluate_moves(void *threadarg) {
 				alpha_move, beta_move,
 				-data->color,
 				killers);
-		printf(" [RECEIVED ROOT (%d) ", Move_is_nullmove(ab->next_child));
-		if (!Move_is_nullmove(ab->next_child)) {
-			Move_print_tree(ab->next_child);
-		}
-		printf("] ");
+		// printf(" [RECEIVED ROOT (%d) ", Move_is_nullmove(ab->next_child));
+		// if (!Move_is_nullmove(ab->next_child)) {
+		// 	Move_print_tree(ab->next_child);
+		// }
+		// printf("] ");
 
 		// Remember results
 		move->fitness = ab->fitness;
@@ -316,18 +320,10 @@ void *evaluate_moves(void *threadarg) {
 		#ifdef PRINT_ALL_MOVES
 			printf("\n");
 			Move_print_tree(move);
-			///Move_print_tree(ab);
 			printf(" %s<- %d%s", white ? color_white : color_black, move->fitness, resetcolor);
 		#endif
 
 		#ifdef PRINT_THINKING
-			// if (white) {
-			// 	printf("Is fitness %d > %d for ", move->fitness, best_fitness);
-			// } else {
-			// 	printf("Is fitness %d < %d for ", move->fitness, best_fitness);
-			// }
-			// Move_print(move);
-			// printf("\n");
 			if ((white && move->fitness > best_fitness) || (!white && move->fitness < best_fitness)) {
 				printf("  Considering ");
 				Move_print_tree(move);
@@ -440,11 +436,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				alpha_move, beta_move,
 				-color,
 				killers);
-		printf(" [RECEIVED (%d) ", Move_is_nullmove(ab->next_child));
-		if (!Move_is_nullmove(ab->next_child)) {
-			Move_print_tree(ab->next_child);
-		}
-		printf("] ");
+		// printf(" [RECEIVED (%d) ", Move_is_nullmove(ab->next_child));
+		// if (!Move_is_nullmove(ab->next_child)) {
+		// 	Move_print_tree(ab->next_child);
+		// }
+		// printf("] ");
 
 		// Remember results
 		move->fitness = ab->fitness;
@@ -494,11 +490,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				result->state = UNFINISHED;
 				Move_destroy(result->next_child);
 				result->next_child = Move_clone(move);
-				printf(" [RETURNING IT A (%d) ", Move_is_nullmove(result->next_child));
-				if (!Move_is_nullmove(result->next_child)) {
-					Move_print_tree(result->next_child);
-				}
-				printf("] ");
+				// printf(" [RETURNING IT A (%d) ", Move_is_nullmove(result->next_child));
+				// if (!Move_is_nullmove(result->next_child)) {
+				// 	Move_print_tree(result->next_child);
+				// }
+				// printf("] ");
 				Move_destroy(moves);
 				return result;
 			}
@@ -508,11 +504,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				Move_destroy(result->next_child);
 				alpha_move = Move_clone(move);
 				result->next_child = alpha_move;
-				printf(" [SETTING IT B (%d) ", Move_is_nullmove(result->next_child));
-				if (!Move_is_nullmove(result->next_child)) {
-					Move_print_tree(result->next_child);
-				}
-				printf("] ");
+				// printf(" [SETTING IT B (%d) ", Move_is_nullmove(result->next_child));
+				// if (!Move_is_nullmove(result->next_child)) {
+				// 	Move_print_tree(result->next_child);
+				// }
+				// printf("] ");
 				#ifdef PRINT_ALL_MOVES
 					printf(" %s(α%s = %d%s)%s", red, resetcolor, alpha, red, resetcolor);
 				#endif
@@ -529,11 +525,11 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 				result->state = UNFINISHED;
 				Move_destroy(result->next_child);
 				result->next_child = Move_clone(move);
-				printf(" [RETURNING IT C (%d) ", Move_is_nullmove(result->next_child));
-				if (!Move_is_nullmove(result->next_child)) {
-					Move_print_tree(result->next_child);
-				}
-				printf("] ");
+				// printf(" [RETURNING IT C (%d) ", Move_is_nullmove(result->next_child));
+				// if (!Move_is_nullmove(result->next_child)) {
+				// 	Move_print_tree(result->next_child);
+				// }
+				// printf("] ");
 				Move_destroy(moves);
 				return result;
 			}
@@ -571,12 +567,12 @@ static Move * alpha_beta(Board *board, Stats *stats, int dist, int depth, int ex
 		result->fitness = beta;
 	}
 	result->state = UNFINISHED;
-	printf(" [RETURNING IT F (%d) ", Move_is_nullmove(result->next_child));
-	if (!Move_is_nullmove(result->next_child)) {
-		Move_print_tree(result->next_child);
-	}
-	printf("] ");
-	printf("Returning result with %d or %d as child\n", result->next_child == NULL, Move_is_nullmove(result->next_child));
+	// printf(" [RETURNING IT F (%d) ", Move_is_nullmove(result->next_child));
+	// if (!Move_is_nullmove(result->next_child)) {
+	// 	Move_print_tree(result->next_child);
+	// }
+	// printf("] ");
+	// printf("Returning result with %d or %d as child\n", result->next_child == NULL, Move_is_nullmove(result->next_child));
 	return result;
 }
 
