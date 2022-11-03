@@ -48,6 +48,7 @@
 	// Responses to check do not count as a ply while searching ('check extension'),
 	// to prevent eternal loops, there's a maximum of extensions allowed per search path:
 	#define MAX_EXTRA_PLY_DEPTH (2)
+	#define PRINT_TREE (1)
 #else
 	#define __MIN_PLY_DEPTH (3)
 	#define MAX_PLY_DEPTH (3)

@@ -65,6 +65,29 @@ void Fitness_debug(int i, int j, Piece *piece, char *message, int value, int tot
 #endif
 
 int Fitness_calculate(Board *board) {
+	// For testing, this evaluation method simply wants all pieces as
+	// leftmost as possible. Should make white play everything to the left,
+	// and black to the right.
+	int i, j;
+	Piece *piece;
+	int result = 0;
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 8; j++) {
+			piece = Board_get_piece(board, i, j);
+			if (piece == NULL) {
+				continue;
+			}
+			if (piece->shape == KING) {
+				result += piece->color * (8 - i);
+			} else {
+				result += piece->color * i;
+			}
+		}
+	}
+	return result;
+}
+
+int Fitness_calculate_orig(Board *board) {
 	// Cache of the number of pawns for each player in each file
 	int cache_pawn_count[2][8];
 	// Cache of the positions of both kings
