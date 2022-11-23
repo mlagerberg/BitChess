@@ -71,16 +71,19 @@ int Fitness_calculate(Board *board) {
 	int i, j;
 	Piece *piece;
 	int result = 0;
+	int turn = Board_turn(board);
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 8; j++) {
 			piece = Board_get_piece(board, i, j);
 			if (piece == NULL) {
 				continue;
 			}
-			if (piece->shape == KING) {
-				result += piece->color * (8 - i);
-			} else {
-				result += piece->color * i;
+			if (piece->color == turn) {
+				if (piece->shape == KING) {
+					result += piece->color * (8 - i);
+				} else {
+					result += piece->color * i;
+				}
 			}
 		}
 	}

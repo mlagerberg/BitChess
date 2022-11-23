@@ -38,3 +38,4 @@ test.chess
 *.swp
 .vscode/
 *.code-workspace
+*.dSYM
